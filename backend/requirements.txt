@@ -1,0 +1,13 @@
+arxiv
+beautifulsoup4
+langchain
+langchain-community
+langchain-core
+langchain-openai
+langgraph
+langgraph-cli
+langgraph_sdk
+pandas
+selenium
+streamlit
+wikipedia
