@@ -1,7 +1,7 @@
 {
   "dockerfile_lines": [],
   "graphs": {
-    "file_reader_agent": "./agents/file_reader_agent.py:agent",
+    "file_reader_agent": "./agents/01_file_reader_agent.py:agent",
     "http_migration_agent": "./agents/http_data_migration_agent.py:agent"
   },
   "env": ".env",

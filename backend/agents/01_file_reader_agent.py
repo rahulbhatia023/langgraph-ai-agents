@@ -1,6 +1,16 @@
+"""
+This code defines a LangChain agent that can read the content of a JSON file and provide a summary of the data.
+The agent follows these steps:
+1. Ask the user for the file path.
+2. Read the JSON file content.
+3. Ask the user if they want to see the summary of the data.
+4. If the user says "yes", provide the total number of records in the file and show the schema for the data.
+5. If the user says "no", end the conversation.
+"""
+
 from typing import TypedDict, Annotated
 
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import SystemMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
