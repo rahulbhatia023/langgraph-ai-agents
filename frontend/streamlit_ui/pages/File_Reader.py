@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from ....backend.agents.file_reader_agent import get_agent
+from langgraph_agents.file_reader_agent import get_agent
 
 st.title("File Reader AI Agent")
 
