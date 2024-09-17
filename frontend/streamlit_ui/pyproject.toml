@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "streamlit_ui"
+version = "0.1.0"
+description = ""
+authors = ["Rahul Bhatia <rahul.bhatia023@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+langgraph-agents = {path = "../../backend", develop = true}
+streamlit = "^1.38.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
