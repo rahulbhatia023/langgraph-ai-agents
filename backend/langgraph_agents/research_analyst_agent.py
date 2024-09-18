@@ -117,8 +117,24 @@ def create_analysts(state: GenerateAnalystsState):
         + [HumanMessage(content="Generate the set of analysts.")]
     )
 
+    prompt_analysts_details = """
+    Below are the details of the analysts:
+    {analysts}
+    
+    Convert these details in a pretty manner to show to the user.
+    
+    Mention to the user that these are the analysts that are participating in the research.
+    And then mention the details. Avoid the header.
+    """
+
+    analysts_details = llm.invoke(prompt_analysts_details.format(analysts=",".join(
+        [
+            a.persona for a in analysts.analysts
+        ]
+    )))
+
     # Write the list of analysis to state
-    return {"analysts": analysts.analysts}
+    return {"messages": [analysts_details], "analysts": analysts.analysts}
 
 
 #####################

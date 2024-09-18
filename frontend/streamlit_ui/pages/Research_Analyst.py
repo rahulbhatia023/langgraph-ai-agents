@@ -72,6 +72,6 @@ run_agent(
     agent_name="Research Analyst AI Agent",
     agent=get_agent(),
     system_message=system_message,
-    nodes_to_display=["agent", "finalize_report"],
+    nodes_to_display=["agent", "create_analysts", "finalize_report"],
     update_as_node="agent"
 )
