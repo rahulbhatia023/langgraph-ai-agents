@@ -1,14 +1,15 @@
 import json
 import operator
 import os
-from typing import TypedDict, Annotated, Union, List
+from typing import Annotated, Union, List, TypedDict
 
 import ollama
 import praw
 from dotenv import load_dotenv
 from langchain_core.agents import AgentAction
 from langchain_core.messages import BaseMessage
-from langgraph.constants import END
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.constants import END, START
 from langgraph.graph import StateGraph
 from praw.models import Comment
 from pydantic.v1 import BaseModel
@@ -87,6 +88,7 @@ class AgentState(TypedDict):
     chat_history: list[BaseMessage]
     intermediate_steps: Annotated[list[tuple[AgentAction, str]], operator.add]
     output: dict[str, Union[str, List[str]]]
+    messages: Annotated[list[dict], operator.add]
 
 
 """
@@ -266,16 +268,17 @@ We will do this for all of our components via three functions:
 """
 
 
-def call_model(state: TypedDict):
+def oracle(state):
     response = call_llm(
         user_input=state["input"],
         chat_history=state["chat_history"],
         intermediate_steps=state["intermediate_steps"],
     )
-    return {"intermediate_steps": [response]}
+    return {"messages": [{"role": "assistant", "content": response.tool_output if response.tool_output else ""}],
+            "intermediate_steps": [response]}
 
 
-def router(state: TypedDict):
+def router(state):
     if isinstance(state["intermediate_steps"], list):
         return state["intermediate_steps"][-1].tool_name
     else:
@@ -285,7 +288,7 @@ def router(state: TypedDict):
 tool_str_to_func = {"search": search, "final_answer": final_answer}
 
 
-def run_tool(state: TypedDict):
+def run_tool(state):
     tool_name = state["intermediate_steps"][-1].tool_name
     tool_input = state["intermediate_steps"][-1].tool_input
     tool_output = tool_str_to_func[tool_name](**tool_input)
@@ -297,28 +300,45 @@ def run_tool(state: TypedDict):
     )
 
     if tool_name == "final_answer":
-        return {"output": tool_output}
+        return {"messages": [{"role": "assistant", "content": tool_output["answer"]}], "output": tool_output}
     else:
         return {"intermediate_steps": [action]}
 
 
+def user_input(state):
+    last_message = state["messages"][-1]
+    return {"input": last_message["content"]}
+
+
+def call_agent(state):
+    response = ollama.chat(
+        model="llama3.1:8b",
+        messages=state["messages"]
+    )
+    return {"messages": [response["message"]]}
+
+
 graph = StateGraph(AgentState)
 
-graph.add_node("agent", call_model)
+graph.add_node("agent", call_agent)
+graph.add_node("user_input", user_input)
+graph.add_node("oracle", oracle)
 graph.add_node("search", run_tool)
 graph.add_node("final_answer", run_tool)
 
-graph.set_entry_point("agent")
-graph.add_conditional_edges(source="agent", path=router)
+graph.add_edge(START, "agent")
+graph.add_edge("agent", "user_input")
+graph.add_edge("user_input", "oracle")
+graph.add_conditional_edges(source="oracle", path=router)
 
 for tool in [search_schema, final_answer_schema]:
     tool_name = tool["function"]["name"]
     if tool_name != "final_answer":
-        graph.add_edge(tool_name, "agent")
+        graph.add_edge(tool_name, "oracle")
 
 graph.add_edge("final_answer", END)
 
-agent = graph.compile()
+agent = graph.compile(interrupt_before=['user_input'], checkpointer=MemorySaver())
 
 
 def get_agent():

@@ -6,11 +6,13 @@ authors = ["Rahul Bhatia <rahul.bhatia023@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.9,<3.9.7 || >3.9.7,<3.13"
 langgraph-agents = {path = "../../backend", develop = true}
 streamlit = "^1.38.0"
 langchain-community = "^0.3.0"
 wikipedia = "^1.4.0"
+praw = "^7.7.1"
+langchain-ollama = "^0.2.0"
 
 [build-system]
 requires = ["poetry-core"]
