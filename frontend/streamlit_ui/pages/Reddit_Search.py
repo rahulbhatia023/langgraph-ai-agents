@@ -44,8 +44,6 @@ def run_agent(
                     input=agent_input, config=config, stream_mode="updates"
             ):
                 for k, v in event.items():
-                    print(k)
-                    print(v)
                     if k in nodes_to_display:
                         display_message(v)
 
