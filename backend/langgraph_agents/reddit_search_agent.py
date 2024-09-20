@@ -41,7 +41,7 @@ class Rec(BaseModel):
     comments: list[str]
 
     def __str__(self):
-        return f"Title: {self.title}\nDescription: {self.description}\nComments:\n{'\n'.join(self.comments)}"
+        return f"\n\n**Title**:\n\n{self.title}\n\n\n**Description**:\n\n{self.description}\n\n\n**Comments:**\n\n{'\n\n'.join(self.comments)}\n\n ---------------------------"
 
 
 def search(query: str) -> list[Rec]:
@@ -69,18 +69,9 @@ def search(query: str) -> list[Rec]:
     return recs
 
 
-def final_answer(answer: str, phone_number: str = "", address: str = ""):
-    """Returns a natural language response to the user. There are four sections
-    to be returned to the user, those are:
-    - `answer`: the final natural language answer to the user's question, should provide as much context as possible.
-    - `phone_number`: the phone number of top recommended restaurant (if found).
-    - `address`: the address of the top recommended restaurant (if found).
-    """
-    return {
-        "answer": answer,
-        "phone_number": phone_number,
-        "address": address,
-    }
+def final_answer(answer: str):
+    """Returns a natural language response to the user"""
+    return {"answer": answer}
 
 
 class AgentState(TypedDict):
@@ -106,14 +97,11 @@ for key in final_answer_schema["function"]["parameters"]["properties"].keys():
         "description"
     ] = None
 
-system_message = """You are the oracle, the great AI decision maker.
+system_message = """
 Given the user's query you must decide what to do with it based on the
 list of tools provided to you.
 
-Your goal is to provide the user with the best possible restaurant
-recommendation. Including key information about why they should consider
-visiting or ordering from the restaurant, and how they can do so, ie by
-providing restaurant address, phone number, website, etc.
+Your goal is to provide the user with the best possible answer.
 
 Note, when using a tool, you provide the tool name and the arguments to use
 in JSON format. For each call, you MUST ONLY use one tool AND the response
@@ -130,8 +118,7 @@ Remember, NEVER use the search tool more than 3x as that can trigger
 the nuclear annihilation system.
 
 After using the search tool you must summarize your findings with the
-final_answer tool. Note, if the user asks a question or says something
-unrelated to restaurants, you must use the final_answer tool directly.
+final_answer tool and always answer based on the context provided.
 """
 
 
@@ -211,21 +198,15 @@ def call_llm(
     scratchpad = create_scratchpad(intermediate_steps)
 
     if scratchpad:
-        scratchpad += [
-            {
-                "role": "user",
-                "content": (
-                    f"Please continue, as a reminder my query was '{user_input}'. "
-                    "Only answer to the original query, and nothing else — but use the "
-                    "information I provided to you to do so. Provide as much "
-                    "information as possible in the `answer` field of the "
-                    "final_answer tool and remember to leave the contact details "
-                    "of a promising looking restaurant."
-                ),
-            }
-        ]
-
-        # We determine the list of tools available to the agent based on whether we have already used the search tool
+        scratchpad += [{
+            "role": "user",
+            "content": (
+                f"Please continue, as a reminder my query was '{user_input}'. "
+                "Only answer to the original query, and nothing else — but use the "
+                "information I provided to you to do so. Provide as much "
+                "information as possible in the `answer` field of the final_answer tool"
+            )
+        }]
         tools_used = [action.tool_name for action in intermediate_steps]
         tools = []
         if "search" in tools_used:
@@ -274,8 +255,16 @@ def oracle(state):
         chat_history=state["chat_history"],
         intermediate_steps=state["intermediate_steps"],
     )
-    return {"messages": [{"role": "assistant", "content": response.tool_output if response.tool_output else ""}],
-            "intermediate_steps": [response]}
+
+    return {
+        "messages": [
+            {
+                "role": "assistant",
+                "content": response.tool_output if response.tool_output else "",
+            }
+        ],
+        "intermediate_steps": [response],
+    }
 
 
 def router(state):
@@ -300,9 +289,27 @@ def run_tool(state):
     )
 
     if tool_name == "final_answer":
-        return {"messages": [{"role": "assistant", "content": tool_output["answer"]}], "output": tool_output}
+        return {
+            "messages": [{"role": "assistant", "content": tool_output["answer"]}],
+            "output": tool_output,
+        }
     else:
-        return {"intermediate_steps": [action]}
+        recommendations = ""
+        for rec in tool_output:
+            recommendations += str(rec) + "\n\n"
+
+        return {
+            "messages": [
+                {
+                    "role": "assistant",
+                    "content": f"""
+                    Here are top 3 discussions with top 3 comments from which I would be analyzing my final response:
+                    
+                    {recommendations}""",
+                }
+            ],
+            "intermediate_steps": [action],
+        }
 
 
 def user_input(state):
@@ -310,24 +317,14 @@ def user_input(state):
     return {"input": last_message["content"]}
 
 
-def call_agent(state):
-    response = ollama.chat(
-        model="llama3.1:8b",
-        messages=state["messages"]
-    )
-    return {"messages": [response["message"]]}
-
-
 graph = StateGraph(AgentState)
 
-graph.add_node("agent", call_agent)
 graph.add_node("user_input", user_input)
 graph.add_node("oracle", oracle)
 graph.add_node("search", run_tool)
 graph.add_node("final_answer", run_tool)
 
-graph.add_edge(START, "agent")
-graph.add_edge("agent", "user_input")
+graph.add_edge(START, "user_input")
 graph.add_edge("user_input", "oracle")
 graph.add_conditional_edges(source="oracle", path=router)
 
@@ -338,7 +335,7 @@ for tool in [search_schema, final_answer_schema]:
 
 graph.add_edge("final_answer", END)
 
-agent = graph.compile(interrupt_before=['user_input'], checkpointer=MemorySaver())
+agent = graph.compile(interrupt_before=["user_input"], checkpointer=MemorySaver())
 
 
 def get_agent():

@@ -11,5 +11,6 @@ st.markdown(
     
     ### - File Reader Agent
     ### - Research Analyst Agent
+    ### - Reddit Search Agent
     """
 )
