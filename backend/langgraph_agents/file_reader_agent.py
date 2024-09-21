@@ -33,7 +33,7 @@ def read_file(file_path):
     :return: The content of the file as a string.
     :rtype: str
     """
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         content = file.read()
     return {"file_content": content}
 
@@ -43,7 +43,8 @@ model = ChatOpenAI(model="gpt-4o", temperature=0, streaming=True).bind_tools(too
 
 
 def call_model(state):
-    system_message = SystemMessage(content="""
+    system_message = SystemMessage(
+        content="""
     You are a helpful assistant that performs below steps:
     1.  Ask user for the file path.
     2.  Read the JSON file content.
@@ -53,7 +54,8 @@ def call_model(state):
         Also show the schema for the data.
 
     If you are not sure about anything apologise and gently say that you cannot do that.
-    """)
+    """
+    )
     response = model.invoke([system_message] + state["messages"])
     return {"messages": [response]}
 
@@ -75,7 +77,7 @@ def human_route(state):
     messages = state["messages"]
     last_message = messages[-1]
     if last_message.content == "quit":
-        return END
+        return "quit"
     else:
         return "agent"
 
@@ -87,8 +89,8 @@ graph.add_node("human", ask_human)
 graph.add_node("tools", ToolNode(tools))
 
 graph.add_edge(START, "agent")
-graph.add_conditional_edges("agent", ai_route)
-graph.add_conditional_edges("human", human_route)
+graph.add_conditional_edges("agent", ai_route, {"tools": "tools", "human": "human"})
+graph.add_conditional_edges("human", human_route, {"agent": "agent", "quit": END})
 graph.add_edge("tools", "agent")
 
 agent = graph.compile(checkpointer=MemorySaver(), interrupt_before=["human"])

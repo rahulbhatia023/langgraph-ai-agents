@@ -50,6 +50,7 @@ llm = ChatOpenAI(model="gpt-4o", temperature=0)
 #   Generate Analysts: Human-In-The-Loop                    #
 #############################################################
 
+
 class UserInput(BaseModel):
     topic: str = Field(description="Research topic for the analysts.")
     max_analysts: int = Field(description="Maximum number of analysts to create.")
@@ -127,11 +128,11 @@ def create_analysts(state: GenerateAnalystsState):
     And then mention the details. Avoid the header.
     """
 
-    analysts_details = llm.invoke(prompt_analysts_details.format(analysts=",".join(
-        [
-            a.persona for a in analysts.analysts
-        ]
-    )))
+    analysts_details = llm.invoke(
+        prompt_analysts_details.format(
+            analysts=",".join([a.persona for a in analysts.analysts])
+        )
+    )
 
     # Write the list of analysis to state
     return {"messages": [analysts_details], "analysts": analysts.analysts}
@@ -422,7 +423,11 @@ interview_builder.add_edge("ask_question", "search_web")
 interview_builder.add_edge("ask_question", "search_wikipedia")
 interview_builder.add_edge("search_web", "answer_question")
 interview_builder.add_edge("search_wikipedia", "answer_question")
-interview_builder.add_conditional_edges("answer_question", route_messages)
+interview_builder.add_conditional_edges(
+    "answer_question",
+    route_messages,
+    {"ask_question": "ask_question", "save_interview": "save_interview"},
+)
 interview_builder.add_edge("save_interview", "write_section")
 interview_builder.add_edge("write_section", END)
 
@@ -508,9 +513,13 @@ def write_report(state: ResearchGraphState):
     formatted_str_sections = "\n\n".join([f"{section}" for section in sections])
 
     # Summarize the sections into a final report
-    system_message = report_writer_instructions.format(topic=topic, context=formatted_str_sections)
+    system_message = report_writer_instructions.format(
+        topic=topic, context=formatted_str_sections
+    )
     report = llm.invoke(
-        [SystemMessage(content=system_message)] + [HumanMessage(content=f"Write a report based upon these memos.")])
+        [SystemMessage(content=system_message)]
+        + [HumanMessage(content=f"Write a report based upon these memos.")]
+    )
     return {"content": report.content}
 
 
@@ -547,8 +556,12 @@ def write_introduction(state: ResearchGraphState):
 
     # Summarize the sections into a final report
 
-    instructions = intro_conclusion_instructions.format(topic=topic, formatted_str_sections=formatted_str_sections)
-    intro = llm.invoke([instructions] + [HumanMessage(content=f"Write the report introduction")])
+    instructions = intro_conclusion_instructions.format(
+        topic=topic, formatted_str_sections=formatted_str_sections
+    )
+    intro = llm.invoke(
+        [instructions] + [HumanMessage(content=f"Write the report introduction")]
+    )
     return {"introduction": intro.content}
 
 
@@ -562,13 +575,17 @@ def write_conclusion(state: ResearchGraphState):
 
     # Summarize the sections into a final report
 
-    instructions = intro_conclusion_instructions.format(topic=topic, formatted_str_sections=formatted_str_sections)
-    conclusion = llm.invoke([instructions] + [HumanMessage(content=f"Write the report conclusion")])
+    instructions = intro_conclusion_instructions.format(
+        topic=topic, formatted_str_sections=formatted_str_sections
+    )
+    conclusion = llm.invoke(
+        [instructions] + [HumanMessage(content=f"Write the report conclusion")]
+    )
     return {"conclusion": conclusion.content}
 
 
 def finalize_report(state: ResearchGraphState):
-    """ This is the "reduce" step where we gather all the sections, combine them, and reflect on them to write the intro/conclusion """
+    """This is the "reduce" step where we gather all the sections, combine them, and reflect on them to write the intro/conclusion"""
 
     # Save full final report
     content = state["content"]
@@ -582,7 +599,13 @@ def finalize_report(state: ResearchGraphState):
     else:
         sources = None
 
-    final_report = state["introduction"] + "\n\n---\n\n" + content + "\n\n---\n\n" + state["conclusion"]
+    final_report = (
+        state["introduction"]
+        + "\n\n---\n\n"
+        + content
+        + "\n\n---\n\n"
+        + state["conclusion"]
+    )
     if sources is not None:
         final_report += "\n\n## Sources\n" + sources
 
@@ -630,12 +653,14 @@ builder.add_conditional_edges("create_analysts", initiate_all_interviews)
 builder.add_edge("conduct_interview", "write_report")
 builder.add_edge("conduct_interview", "write_introduction")
 builder.add_edge("conduct_interview", "write_conclusion")
-builder.add_edge(["write_conclusion", "write_report", "write_introduction"], "finalize_report")
+builder.add_edge(
+    ["write_conclusion", "write_report", "write_introduction"], "finalize_report"
+)
 builder.add_edge("finalize_report", END)
 
 # Compile
 memory = MemorySaver()
-agent = builder.compile(interrupt_before=['user_input'], checkpointer=memory)
+agent = builder.compile(interrupt_before=["user_input"], checkpointer=memory)
 
 
 def get_agent():

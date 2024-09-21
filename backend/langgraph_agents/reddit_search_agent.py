@@ -193,20 +193,22 @@ def create_scratchpad(intermediate_steps: list[AgentAction]):
 
 
 def call_llm(
-        user_input: str, chat_history: list[dict], intermediate_steps: list[AgentAction]
+    user_input: str, chat_history: list[dict], intermediate_steps: list[AgentAction]
 ) -> AgentAction:
     scratchpad = create_scratchpad(intermediate_steps)
 
     if scratchpad:
-        scratchpad += [{
-            "role": "user",
-            "content": (
-                f"Please continue, as a reminder my query was '{user_input}'. "
-                "Only answer to the original query, and nothing else — but use the "
-                "information I provided to you to do so. Provide as much "
-                "information as possible in the `answer` field of the final_answer tool"
-            )
-        }]
+        scratchpad += [
+            {
+                "role": "user",
+                "content": (
+                    f"Please continue, as a reminder my query was '{user_input}'. "
+                    "Only answer to the original query, and nothing else — but use the "
+                    "information I provided to you to do so. Provide as much "
+                    "information as possible in the `answer` field of the final_answer tool"
+                ),
+            }
+        ]
         tools_used = [action.tool_name for action in intermediate_steps]
         tools = []
         if "search" in tools_used:
@@ -326,7 +328,11 @@ graph.add_node("final_answer", run_tool)
 
 graph.add_edge(START, "user_input")
 graph.add_edge("user_input", "oracle")
-graph.add_conditional_edges(source="oracle", path=router)
+graph.add_conditional_edges(
+    source="oracle",
+    path=router,
+    path_map={"search": "search", "final_answer": "final_answer"},
+)
 
 for tool in [search_schema, final_answer_schema]:
     tool_name = tool["function"]["name"]
