@@ -10,7 +10,8 @@ st.markdown(
     ## Welcome to the world of AI Agents !
     
     ### - File Reader Agent
-    ### - Research Analyst Agent
+    ### - Financial Advisor Agent
     ### - Reddit Search Agent
+    ### - Research Analyst Agent
     """
 )
