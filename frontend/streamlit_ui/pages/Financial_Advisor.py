@@ -28,11 +28,11 @@ Remember your goal is to answer the users query and provide a clear, actionable 
 
 
 def run_agent(
-        agent_name: str,
-        agent: CompiledStateGraph,
-        system_message: str,
-        nodes_to_display: list[str],
-        update_as_node: str
+    agent_name: str,
+    agent: CompiledStateGraph,
+    system_message: str,
+    nodes_to_display: list[str],
+    update_as_node: str,
 ):
     st.title(agent_name)
 
@@ -59,17 +59,13 @@ def run_agent(
     def stream_events(input):
         if not nodes_to_display:
             for event in agent.stream(
-                    input=input,
-                    config=config,
-                    stream_mode="updates"
+                input=input, config=config, stream_mode="updates"
             ):
                 for k, v in event.items():
                     display_message(v)
         else:
             for event in agent.stream(
-                    input=input,
-                    config=config,
-                    stream_mode="updates"
+                input=input, config=config, stream_mode="updates"
             ):
                 for k, v in event.items():
                     if k in nodes_to_display:
@@ -77,7 +73,11 @@ def run_agent(
 
     if human_message := st.chat_input():
         add_chat_message("human", human_message)
-        agent.update_state(config, {"messages": [HumanMessage(content=human_message)]}, as_node=update_as_node)
+        agent.update_state(
+            config,
+            {"messages": [HumanMessage(content=human_message)]},
+            as_node=update_as_node,
+        )
         stream_events(None)
     else:
         stream_events({"messages": [SystemMessage(content=system_message)]})
@@ -88,5 +88,5 @@ run_agent(
     agent=get_agent(),
     system_message=system_message,
     nodes_to_display=[],
-    update_as_node="human"
+    update_as_node="human",
 )

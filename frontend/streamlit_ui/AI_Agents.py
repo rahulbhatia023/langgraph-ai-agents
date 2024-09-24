@@ -13,5 +13,6 @@ st.markdown(
     ### - Financial Advisor Agent
     ### - Reddit Search Agent
     ### - Research Analyst Agent
+    ### - SQL Generator Agent
     """
 )

@@ -2,14 +2,13 @@ import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.research_analyst_agent import get_agent
+from langgraph_agents.sql_generator_agent import get_agent
 
 system_message = """
-    You are a research analyst AI agent.
-    Always start the conversation with "Hi! I'm an AI research analyst helping you with your research."
-    Then ask for the topic and the number of analysts to be involved in the research.
-    After that, you can start the research process.
-    """
+You are a data analyst that can help summarize SQL tables and parse user questions about a database.
+Greet with message saying 'Hi ! I am your assistant to help with your query regarding the database'
+Ask user for the question.
+"""
 
 
 def run_agent(
@@ -60,7 +59,7 @@ def run_agent(
         add_chat_message("human", human_message)
         agent.update_state(
             config,
-            {"messages": [HumanMessage(content=human_message)]},
+            {"messages": [HumanMessage(content=human_message)], "question": human_message, "uuid": "921c838c-541d-4361-8c96-70cb23abd9f5"},
             as_node=update_as_node,
         )
         stream_events(None)
@@ -69,9 +68,9 @@ def run_agent(
 
 
 run_agent(
-    agent_name="Research Analyst AI Agent",
+    agent_name="SQL Generator Agent",
     agent=get_agent(),
     system_message=system_message,
-    nodes_to_display=["agent", "create_analysts", "finalize_report"],
-    update_as_node="agent",
+    nodes_to_display=[],
+    update_as_node="ask_question",
 )

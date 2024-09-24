@@ -5,10 +5,10 @@ from langgraph_agents.reddit_search_agent import get_agent
 
 
 def run_agent(
-        agent_name: str,
-        agent: CompiledStateGraph,
-        nodes_to_display: list[str],
-        update_as_node: str,
+    agent_name: str,
+    agent: CompiledStateGraph,
+    nodes_to_display: list[str],
+    update_as_node: str,
 ):
     st.title(agent_name)
 
@@ -35,13 +35,13 @@ def run_agent(
     def stream_events(agent_input):
         if not nodes_to_display:
             for event in agent.stream(
-                    input=agent_input, config=config, stream_mode="updates"
+                input=agent_input, config=config, stream_mode="updates"
             ):
                 for k, v in event.items():
                     display_message(v)
         else:
             for event in agent.stream(
-                    input=agent_input, config=config, stream_mode="updates"
+                input=agent_input, config=config, stream_mode="updates"
             ):
                 for k, v in event.items():
                     if k in nodes_to_display:
