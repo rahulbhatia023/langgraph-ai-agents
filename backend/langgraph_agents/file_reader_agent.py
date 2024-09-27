@@ -94,7 +94,3 @@ graph.add_conditional_edges("human", human_route, {"agent": "agent", "quit": END
 graph.add_edge("tools", "agent")
 
 agent = graph.compile(checkpointer=MemorySaver(), interrupt_before=["human"])
-
-
-def get_agent():
-    return agent

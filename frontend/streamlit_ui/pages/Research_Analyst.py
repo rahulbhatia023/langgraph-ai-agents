@@ -2,7 +2,7 @@ import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.research_analyst_agent import get_agent
+from langgraph_agents.research_analyst_agent import agent
 
 system_message = """
     You are a research analyst AI agent.
@@ -70,8 +70,11 @@ def run_agent(
 
 run_agent(
     agent_name="Research Analyst AI Agent",
-    agent=get_agent(),
+    agent=agent,
     system_message=system_message,
     nodes_to_display=["agent", "create_analysts", "finalize_report"],
     update_as_node="agent",
 )
+
+with st.sidebar:
+    st.image(agent.get_graph().draw_mermaid_png())

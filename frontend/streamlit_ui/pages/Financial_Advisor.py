@@ -4,7 +4,7 @@ import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.financial_advisor_agent import get_agent
+from langgraph_agents.financial_advisor_agent import agent
 
 system_message = f"""
 You are a highly capable financial assistant named FinanceGPT. Your purpose is to provide insightful and concise analysis to help users make informed financial decisions.
@@ -85,8 +85,11 @@ def run_agent(
 
 run_agent(
     agent_name="Financial Advisor Agent",
-    agent=get_agent(),
+    agent=agent,
     system_message=system_message,
     nodes_to_display=[],
     update_as_node="human",
 )
+
+with st.sidebar:
+    st.image(agent.get_graph().draw_mermaid_png())

@@ -16,6 +16,7 @@ langchain-community = "^0.3.0"
 praw = "^7.7.1"
 semantic-router = "^0.0.61"
 langchain-ollama = "^0.2.0"
+e2b-code-interpreter = "^0.0.10"
 
 [build-system]
 requires = ["poetry-core"]

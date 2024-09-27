@@ -70,7 +70,3 @@ graph.add_conditional_edges(
 graph.add_edge("tools", "agent")
 
 agent = graph.compile(checkpointer=MemorySaver(), interrupt_before=["human"])
-
-
-def get_agent():
-    return agent

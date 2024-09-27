@@ -2,7 +2,7 @@ import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.sql_generator_agent import get_agent
+from langgraph_agents.sql_generator_agent import agent
 
 system_message = """
 You are a data analyst that can help summarize SQL tables and parse user questions about a database.
@@ -69,8 +69,11 @@ def run_agent(
 
 run_agent(
     agent_name="SQL Generator Agent",
-    agent=get_agent(),
+    agent=agent,
     system_message=system_message,
     nodes_to_display=[],
     update_as_node="ask_question",
 )
+
+with st.sidebar:
+    st.image(agent.get_graph().draw_mermaid_png())

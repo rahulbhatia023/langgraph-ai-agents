@@ -2,7 +2,7 @@ import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.file_reader_agent import get_agent
+from langgraph_agents.file_reader_agent import agent
 
 system_message = """
 You are a helpful assistant that performs below steps:
@@ -75,8 +75,11 @@ def run_agent(
 
 run_agent(
     agent_name="File Reader Agent",
-    agent=get_agent(),
+    agent=agent,
     system_message=system_message,
     nodes_to_display=[],
     update_as_node="human",
 )
+
+with st.sidebar:
+    st.image(agent.get_graph().draw_mermaid_png())

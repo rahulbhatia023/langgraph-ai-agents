@@ -342,7 +342,3 @@ for tool in [search_schema, final_answer_schema]:
 graph.add_edge("final_answer", END)
 
 agent = graph.compile(interrupt_before=["user_input"], checkpointer=MemorySaver())
-
-
-def get_agent():
-    return agent

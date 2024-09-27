@@ -351,7 +351,11 @@ def format_results(state: dict) -> dict:
     final response: {response}
     """
 
-    final_response = llm.invoke(final_response_prompt.format(query=state["sql_query"], results=state["results"], response=response)).content
+    final_response = llm.invoke(
+        final_response_prompt.format(
+            query=state["sql_query"], results=state["results"], response=response
+        )
+    ).content
 
     return {"messages": [AIMessage(content=final_response)]}
 
@@ -379,10 +383,6 @@ workflow.add_edge("execute_sql", "format_results")
 workflow.add_edge("format_results", END)
 
 agent = workflow.compile(checkpointer=MemorySaver(), interrupt_before=["ask_question"])
-
-
-def get_agent():
-    return agent
 
 
 """

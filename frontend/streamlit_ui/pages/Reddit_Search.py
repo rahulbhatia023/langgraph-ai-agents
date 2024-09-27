@@ -1,7 +1,7 @@
 import streamlit as st
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.reddit_search_agent import get_agent
+from langgraph_agents.reddit_search_agent import agent
 
 
 def run_agent(
@@ -59,7 +59,10 @@ def run_agent(
 
 run_agent(
     agent_name="Reddit Search Agent",
-    agent=get_agent(),
+    agent=agent,
     nodes_to_display=["user_input", "search", "final_answer"],
     update_as_node="user_input",
 )
+
+with st.sidebar:
+    st.image(agent.get_graph().draw_mermaid_png())

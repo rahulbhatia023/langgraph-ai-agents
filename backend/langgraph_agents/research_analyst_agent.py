@@ -661,7 +661,3 @@ builder.add_edge("finalize_report", END)
 # Compile
 memory = MemorySaver()
 agent = builder.compile(interrupt_before=["user_input"], checkpointer=memory)
-
-
-def get_agent():
-    return agent
