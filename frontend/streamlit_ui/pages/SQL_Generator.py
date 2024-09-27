@@ -59,7 +59,11 @@ def run_agent(
         add_chat_message("human", human_message)
         agent.update_state(
             config,
-            {"messages": [HumanMessage(content=human_message)], "question": human_message, "uuid": "921c838c-541d-4361-8c96-70cb23abd9f5"},
+            {
+                "messages": [HumanMessage(content=human_message)],
+                "question": human_message,
+                "uuid": "921c838c-541d-4361-8c96-70cb23abd9f5",
+            },
             as_node=update_as_node,
         )
         stream_events(None)
