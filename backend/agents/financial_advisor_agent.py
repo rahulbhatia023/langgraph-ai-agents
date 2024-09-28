@@ -5,10 +5,10 @@ from langgraph.constants import END, START
 from langgraph.graph import MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
 
-from .tools.financial_advisor.last_quote import get_last_quote
-from .tools.financial_advisor.line_items import search_line_items
-from .tools.financial_advisor.prices import get_prices
-from .tools.financial_advisor.ticker_news import get_ticker_news
+from tools.financial_advisor.last_quote import get_last_quote
+from tools.financial_advisor.line_items import search_line_items
+from tools.financial_advisor.prices import get_prices
+from tools.financial_advisor.ticker_news import get_ticker_news
 
 load_dotenv()
 

@@ -1,63 +1,69 @@
 import streamlit as st
-from streamlit_card import card
 
 st.set_page_config(page_title="AI Agents", page_icon="🤖", layout="wide")
-
-import streamlit as st
-
 
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Open Sans:wght@300;400;600;700&display=swap');
-        
+
     .stApp {
         background-color: #2A2A2A;
     }
-    
+
     h1 {
         font-family: 'Poppins', sans-serif;
         color: #BB86FC;
         text-align: center;
     }
-    
+
     h3 {
         font-family: 'Poppins', sans-serif;
         color: #BB86FA;
         text-align: center;
     }
-    
+
     p {
         font-size: 18px;
         line-height: 1.6;
+        color: #E0E0E0;
     }
-    
+
     .vertical-spacer {
         margin-top: 80px;
         margin-bottom: 80px;
     }
 
     /* Custom card styles */
-    
     .custom-card {
         background-color: #1A1A1A;
         border: 1px solid #BB86FC;
         border-radius: 20px;
         padding: 20px;
-        width: 350px;  /* Fixed width */
-        height: 500px; /* Fixed height */
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
 
-    .custom-card h3 {
+    .custom-card h4 {
         color: #BB86FC;
         font-family: 'Poppins', sans-serif;
         font-weight: 600;
         margin-bottom: 10px;
     }
+
     .custom-card p {
         color: #E0E0E0;
         font-family: 'Open Sans', sans-serif;
         font-size: 16px;
+    }
+
+    .custom-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 15px;
     }
     </style>
     """,
@@ -65,11 +71,12 @@ st.markdown(
 )
 
 
-def custom_card(title, text, image_url):
+def custom_card(title, description, image_url):
     return f"""
     <div class="custom-card">
-        <h3>{title}</h3>
-        <p>{text}</p>
+        <img src="{image_url}" alt="{title}">
+        <h4>{title}</h4>
+        <p>{description}</p>
     </div>
     """
 
@@ -84,16 +91,20 @@ st.markdown(
 st.markdown('<div class="vertical-spacer"></div>', unsafe_allow_html=True)
 
 # AI Agent Cards
-col1, col2, col3 = st.columns(3)
+# Use st.container() to create a flexible container
+container = st.container()
+
+# Use columns with equal width inside the container
+col1, col2, col3 = container.columns(3)
 
 with col1:
     st.markdown(
         custom_card(
             "Reactive Agents",
             "These agents react to the current state of the environment without considering past experiences.",
-            "https://via.placeholder.com/150",
+            "https://via.placeholder.com/150"
         ),
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 with col2:
@@ -101,9 +112,9 @@ with col2:
         custom_card(
             "Deliberative Agents",
             "These agents maintain an internal state and model of the world to make decisions.",
-            "https://via.placeholder.com/150",
+            "https://via.placeholder.com/150"
         ),
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
 with col3:
@@ -111,7 +122,7 @@ with col3:
         custom_card(
             "Learning Agents",
             "These agents can learn from their experiences and improve their performance over time.",
-            "https://via.placeholder.com/150",
+            "https://via.placeholder.com/150"
         ),
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )

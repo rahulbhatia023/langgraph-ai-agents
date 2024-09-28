@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "langgraph_agents"
-version = "0.1.0"
+name = "langgraph-ai-agents"
+version = "1.0"
 description = ""
-authors = ["Rahul Bhatia <rahul.bhatia023@gmail.com>"]
+authors = ["Rahul Bhatia"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

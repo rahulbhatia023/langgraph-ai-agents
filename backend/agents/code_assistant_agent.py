@@ -4,10 +4,10 @@ from langgraph.constants import END
 from langgraph.graph import MessageGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from langgraph_agents.tools.code_assistant.execute_python import execute_python
-from langgraph_agents.tools.code_assistant.install_npm_dependencies import install_npm_dependencies
-from langgraph_agents.tools.code_assistant.render_react import render_react
-from langgraph_agents.tools.code_assistant.send_file_to_user import send_file_to_user
+from tools.code_assistant.execute_python import execute_python
+from tools.code_assistant.install_npm_dependencies import install_npm_dependencies
+from tools.code_assistant.render_react import render_react
+from tools.code_assistant.send_file_to_user import send_file_to_user
 
 tools = [execute_python, render_react, install_npm_dependencies, send_file_to_user]
 
