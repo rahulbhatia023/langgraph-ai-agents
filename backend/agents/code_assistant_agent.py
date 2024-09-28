@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.constants import END
@@ -8,6 +9,8 @@ from tools.code_assistant.execute_python import execute_python
 from tools.code_assistant.install_npm_dependencies import install_npm_dependencies
 from tools.code_assistant.render_react import render_react
 from tools.code_assistant.send_file_to_user import send_file_to_user
+
+load_dotenv()
 
 tools = [execute_python, render_react, install_npm_dependencies, send_file_to_user]
 

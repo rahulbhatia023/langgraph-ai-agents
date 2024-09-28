@@ -29,6 +29,7 @@ Output Format:
 import operator
 from typing import List, Annotated
 
+from dotenv import load_dotenv
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.tools import TavilySearchResults
 from langchain_core.messages import (
@@ -42,6 +43,8 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.constants import START, END, Send
 from langgraph.graph import StateGraph, MessagesState
 from pydantic import BaseModel, Field
+
+load_dotenv()
 
 llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
