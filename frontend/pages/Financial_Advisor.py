@@ -4,7 +4,7 @@ import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.financial_advisor_agent import agent
+from backend.agents.financial_advisor_agent import agent
 
 system_message = f"""
 You are a highly capable financial assistant named FinanceGPT. Your purpose is to provide insightful and concise analysis to help users make informed financial decisions.

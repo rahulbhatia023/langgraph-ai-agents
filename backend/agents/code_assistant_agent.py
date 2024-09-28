@@ -5,10 +5,12 @@ from langgraph.constants import END
 from langgraph.graph import MessageGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from tools.code_assistant.execute_python import execute_python
-from tools.code_assistant.install_npm_dependencies import install_npm_dependencies
-from tools.code_assistant.render_react import render_react
-from tools.code_assistant.send_file_to_user import send_file_to_user
+from backend.tools.code_assistant.execute_python import execute_python
+from backend.tools.code_assistant.install_npm_dependencies import (
+    install_npm_dependencies,
+)
+from backend.tools.code_assistant.render_react import render_react
+from backend.tools.code_assistant.send_file_to_user import send_file_to_user
 
 load_dotenv()
 

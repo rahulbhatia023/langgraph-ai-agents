@@ -6,7 +6,7 @@ authors = ["Rahul Bhatia"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.12,<3.13"
 cohere = "5.9.2"
 langgraph = "^0.2.21"
 langchain-openai = "^0.2.0"
@@ -17,6 +17,7 @@ praw = "^7.7.1"
 semantic-router = "^0.0.61"
 langchain-ollama = "^0.2.0"
 e2b-code-interpreter = "^0.0.10"
+streamlit = "^1.38.0"
 
 [build-system]
 requires = ["poetry-core"]

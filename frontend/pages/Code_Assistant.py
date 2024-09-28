@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from e2b_code_interpreter import CodeInterpreter
 from langchain_core.messages import AIMessage
 
-from langgraph_agents.code_assistant_agent import agent
+from backend.agents.code_assistant_agent import agent
 
 load_dotenv()
 

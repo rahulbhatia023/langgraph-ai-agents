@@ -2,7 +2,7 @@ import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.research_analyst_agent import agent
+from backend.agents.research_analyst_agent import agent
 
 system_message = """
     You are a research analyst AI agent.

@@ -1,7 +1,7 @@
 import streamlit as st
 from langgraph.graph.state import CompiledStateGraph
 
-from langgraph_agents.reddit_search_agent import agent
+from backend.agents.reddit_search_agent import agent
 
 
 def run_agent(
