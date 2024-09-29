@@ -4,7 +4,6 @@ import time
 import streamlit as st
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
-from e2b_code_interpreter import CodeInterpreter
 from langchain_core.messages import AIMessage
 
 from backend.agents.code_assistant_agent import agent
@@ -12,6 +11,24 @@ from backend.agents.code_assistant_agent import agent
 load_dotenv()
 
 st.set_page_config(layout="wide")
+
+st.markdown(
+    """
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+    
+        .stApp {
+            font-family: 'Poppins';
+        }
+        
+        .fontStyle {
+            font-family: 'Poppins';
+            color: #BB86FC;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.session_state["messages"] = [
     {
@@ -35,13 +52,8 @@ st.session_state.chat_history = []
 
 if os.path.exists("application.flag"):
     os.remove("application.flag")
-
-sandbox = CodeInterpreter.create()
-sandbox_id = sandbox.id
-sandbox.keep_alive(300)
-
-with open("sandbox_id.txt", "w") as f:
-    f.write(sandbox_id)
+if os.path.exists("e2b_sandbox.txt"):
+    os.remove("e2b_sandbox.txt")
 
 col1, col2, col3, col4 = st.columns([0.05, 0.45, 0.05, 0.45])
 
@@ -52,7 +64,8 @@ with st.sidebar:
     st.image(agent.get_graph().draw_mermaid_png())
 
 with col2:
-    st.header("Chat Messages")
+    st.markdown("<h1 class='fontStyle'>Code Assistant</h1>", unsafe_allow_html=True)
+
     messages = st.container(height=600, border=False)
 
     for message in st.session_state.chat_history:
@@ -68,9 +81,7 @@ with col2:
             else:
                 messages.chat_message("assistant").markdown(message["content"])
 
-    user_prompt = st.chat_input()
-
-    if user_prompt:
+    if user_prompt := st.chat_input("Hi ! How can I assist you today ?"):
         messages.chat_message("user").write(user_prompt)
         st.session_state.messages.append({"role": "user", "content": user_prompt})
         st.session_state.chat_history.append(
@@ -80,14 +91,14 @@ with col2:
         thread = {"configurable": {"thread_id": "1"}}
         ai_messages = ""
         for event in agent.stream(
-            input=st.session_state.messages, config=thread, stream_mode="values"
+                input=st.session_state.messages, config=thread, stream_mode="values"
         ):
             for message in reversed(event):
                 if not isinstance(message, AIMessage):
                     break
                 else:
                     if (message.tool_calls and isinstance(message.content, list)) or (
-                        message.tool_calls and isinstance(message.content, str)
+                            message.tool_calls and isinstance(message.content, str)
                     ):
                         if isinstance(message.content, list):
                             for part in message.content:

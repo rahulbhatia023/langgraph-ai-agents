@@ -5,21 +5,22 @@ st.set_page_config(page_title="AI Agents", page_icon="🤖", layout="wide")
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Open Sans:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
     
     .stApp {
-        background-color: #2A2A2A;
+        background-color: #16423C;
+        font-family: 'Poppins';
     }
 
     h1 {
-        font-family: 'Poppins', sans-serif;
-        color: #BB86FC;
+        font-family: 'Poppins';
+        color: #C4DAD2;
         text-align: center;
     }
 
     h3 {
-        font-family: 'Poppins', sans-serif;
-        color: #BB86FA;
+        font-family: 'Poppins';
+        color: #E9EFEC;
         text-align: center;
         font-size: 20px;
         font-weight: 10;
@@ -38,8 +39,8 @@ st.markdown(
 
     /* Custom card styles */
     .custom-card {
-        background-color: #1A1A1A;
-        border: 1px solid #FFFFFF;
+        background-color: #6A9C89;
+        border: 3px solid #FFFFFF;
         border-radius: 20px;
         padding: 20px;
         height: 405px;
@@ -49,15 +50,16 @@ st.markdown(
     }
 
     .custom-card h4 {
-        color: #BB86FC;
-        font-family: 'Poppins', sans-serif;
+        color: #16423C;
+        font-family: 'Poppins';
         font-weight: 600;
         margin-bottom: 10px;
         text-align: center;
     }
 
     .custom-card p {
-        font-family: 'Poppins', sans-serif;
+        color: #FFFFFF;
+        font-family: 'Poppins';
         font-size: 15px;
         text-align: center;
     }
