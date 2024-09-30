@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 
 st.set_page_config(page_title="AI Agents", page_icon="🤖", layout="wide")
@@ -26,6 +28,11 @@ st.markdown(
         font-weight: 10;
     }
 
+    p {
+        font-family: 'Poppins';
+        color: #C4DAD2;
+    }
+    
     .vertical-spacer {
         margin-top: 80px;
         margin-bottom: 80px;
@@ -60,6 +67,28 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+with st.sidebar:
+    def get_api_key(key_name):
+        if key_name not in st.session_state:
+            st.session_state[key_name] = os.getenv(key_name, "")
+
+        api_key = st.text_input(
+            label=f"{key_name}",
+            type="password",
+            value=st.session_state[key_name],
+            key=f"{key_name}_input"
+        )
+
+        if api_key:
+            st.session_state[key_name] = api_key
+            os.environ[key_name] = api_key
+
+        return api_key
+
+
+    openai_api_key = get_api_key("OPENAI_API_KEY")
+    e2b_api_key = get_api_key("E2B_API_KEY")
+
 
 def custom_card(title, description):
     return f"""
@@ -70,18 +99,12 @@ def custom_card(title, description):
     """
 
 
-# Main content
 st.markdown("<h1>Welcome to the World of AI Agents</h1>", unsafe_allow_html=True)
 st.markdown("<h3>Where Intelligence Meets Innovation</h3>", unsafe_allow_html=True)
-
-# Add increased vertical space
 st.markdown('<div class="vertical-spacer"></div>', unsafe_allow_html=True)
 
-# AI Agent Cards
-# Use st.container() to create a flexible container
 container = st.container()
 
-# Use columns with equal width inside the container
 col11, col12, col13 = container.columns(3)
 
 with col11:
