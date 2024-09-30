@@ -3,13 +3,27 @@ import time
 
 import streamlit as st
 import streamlit.components.v1 as components
-from e2b_code_interpreter import CodeInterpreter
 from langchain_core.messages import HumanMessage, SystemMessage
-from langgraph.graph.state import CompiledStateGraph
 
 from backend.agents.code_assistant_agent import agent
 
-st.set_page_config(layout="wide")
+agent_name = "Code Assistant"
+
+system_prompt = """
+        You are a Python and React expert. You can create React applications and run Python code in a Jupyter notebook. Here are some guidelines for this environment:
+        - The python code runs in jupyter notebook.
+        - Display visualizations using matplotlib or any other visualization library directly in the notebook. don't worry about saving the visualizations to a file.
+        - You have access to the internet and can make api requests.
+        - You also have access to the filesystem and can read/write files.
+        - You can install any pip package when you need. But the usual packages for data analysis are already preinstalled. Use the `!pip install -q package_name` command to install a package.
+        - You can run any python code you want, everything is running in a secure sandbox environment.
+        - NEVER execute provided tools when you are asked to explain your code.
+        - NEVER use `execute_python` tool when you are asked to create a react application. Use `render_react` tool instead.
+        - Prioritize to use tailwindcss for styling your react components.
+        - Always display the code to the user while generating the final response
+        """
+
+st.set_page_config(page_title=agent_name, page_icon="🤖", layout="wide")
 
 st.markdown(
     """
@@ -47,84 +61,50 @@ with st.sidebar:
 
     st.image(agent.get_graph().draw_mermaid_png(), use_column_width="always")
 
+st.markdown(f"<h2 class='fontStyle'>{agent_name}</h2>", unsafe_allow_html=True)
 
-def run_agent(
-        agent_name: str,
-        agent: CompiledStateGraph,
-        system_prompt: str,
-        nodes_to_display: list[str],
-):
-    st.markdown(f"<h2 class='fontStyle'>{agent_name}</h2>", unsafe_allow_html=True)
+config = {"configurable": {"thread_id": "1"}}
 
-    config = {"configurable": {"thread_id": "1"}}
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-    def display_message(v):
-        if "messages" in v:
-            m = v["messages"][-1]
-            if (m.type == "ai" and not m.tool_calls) or m.type == "human":
-                add_chat_message(m.type, m.content)
-
-    def add_chat_message(role, content):
-        st.session_state.messages.append({"role": role, "content": content})
-        with st.chat_message(role):
-            st.markdown(content)
-
-    def stream_events(input):
-        if not nodes_to_display:
-            for event in agent.stream(
-                    input=input, config=config, stream_mode="updates"
-            ):
-                for k, v in event.items():
-                    display_message(v)
-
-        else:
-            for event in agent.stream(
-                    input=input, config=config, stream_mode="updates"
-            ):
-                for k, v in event.items():
-                    if k in nodes_to_display:
-                        display_message(v)
-
-    if human_message := st.chat_input():
-        add_chat_message("human", human_message)
-        stream_events(
-            {
-                "messages": [
-                    SystemMessage(content=system_prompt),
-                    HumanMessage(content=human_message),
-                ]
-            }
-        )
-
-    if os.path.exists("application.flag"):
-        st.markdown("<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True)
-        components.iframe(src=f"http://localhost:3000?t={int(time.time())}", height=500)
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 
-system_prompt = """
-        You are a Python and React expert. You can create React applications and run Python code in a Jupyter notebook. Here are some guidelines for this environment:
-        - The python code runs in jupyter notebook.
-        - Display visualizations using matplotlib or any other visualization library directly in the notebook. don't worry about saving the visualizations to a file.
-        - You have access to the internet and can make api requests.
-        - You also have access to the filesystem and can read/write files.
-        - You can install any pip package when you need. But the usual packages for data analysis are already preinstalled. Use the `!pip install -q package_name` command to install a package.
-        - You can run any python code you want, everything is running in a secure sandbox environment.
-        - NEVER execute provided tools when you are asked to explain your code.
-        - NEVER use `execute_python` tool when you are asked to create a react application. Use `render_react` tool instead.
-        - Prioritize to use tailwindcss for styling your react components.
-        - Always display the code to the user while generating the final response
-        """
+def display_message(v):
+    if "messages" in v:
+        m = v["messages"][-1]
+        if (m.type == "ai" and not m.tool_calls) or m.type == "human":
+            add_chat_message(m.type, m.content)
 
-run_agent(
-    agent_name="Code Assistant",
-    agent=agent,
-    system_prompt=system_prompt,
-    nodes_to_display=[],
-)
+
+def add_chat_message(role, content):
+    st.session_state.messages.append({"role": role, "content": content})
+    with st.chat_message(role):
+        st.markdown(content)
+
+
+def stream_events(input):
+    for event in agent.stream(
+            input=input, config=config, stream_mode="updates"
+    ):
+        for k, v in event.items():
+            display_message(v)
+
+
+if human_message := st.chat_input():
+    add_chat_message("human", human_message)
+    stream_events(
+        {
+            "messages": [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=human_message),
+            ]
+        }
+    )
+
+if os.path.exists("application.flag"):
+    st.markdown("<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True)
+    components.iframe(src=f"http://localhost:3000?t={int(time.time())}", height=500)

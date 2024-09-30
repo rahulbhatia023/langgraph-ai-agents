@@ -1,6 +1,37 @@
 import os
 
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+def get_api_key(key_name):
+    if key_name not in st.session_state:
+        st.session_state[key_name] = os.getenv(key_name, "")
+
+    api_key = st.text_input(
+        label=f"{key_name}",
+        type="password",
+        value=st.session_state[key_name],
+        key=f"{key_name}_input"
+    )
+
+    if api_key:
+        st.session_state[key_name] = api_key
+        os.environ[key_name] = api_key
+
+    return api_key
+
+
+def custom_card(title, description):
+    return f"""
+    <div class="custom-card">
+        <h4>{title}</h4>
+        <p>{description}</p>
+    </div>
+    """
+
 
 st.set_page_config(page_title="AI Agents", page_icon="🤖", layout="wide")
 
@@ -68,36 +99,8 @@ st.markdown(
 )
 
 with st.sidebar:
-    def get_api_key(key_name):
-        if key_name not in st.session_state:
-            st.session_state[key_name] = os.getenv(key_name, "")
-
-        api_key = st.text_input(
-            label=f"{key_name}",
-            type="password",
-            value=st.session_state[key_name],
-            key=f"{key_name}_input"
-        )
-
-        if api_key:
-            st.session_state[key_name] = api_key
-            os.environ[key_name] = api_key
-
-        return api_key
-
-
     openai_api_key = get_api_key("OPENAI_API_KEY")
     e2b_api_key = get_api_key("E2B_API_KEY")
-
-
-def custom_card(title, description):
-    return f"""
-    <div class="custom-card">
-        <h4>{title}</h4>
-        <p>{description}</p>
-    </div>
-    """
-
 
 st.markdown("<h1>Welcome to the World of AI Agents</h1>", unsafe_allow_html=True)
 st.markdown("<h3>Where Intelligence Meets Innovation</h3>", unsafe_allow_html=True)
@@ -133,8 +136,6 @@ with col13:
         ),
         unsafe_allow_html=True,
     )
-
-st.markdown('<div class="row-spacer"></div>', unsafe_allow_html=True)
 
 col21, col22, _ = container.columns(3)
 

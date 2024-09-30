@@ -1,5 +1,6 @@
 import os
 
+from dotenv import load_dotenv
 from e2b_code_interpreter import CodeInterpreter
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
