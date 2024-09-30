@@ -1,0 +1,12 @@
+{
+  "graphs": {
+    "code_assistant_agent": "./backend/agents/code_assistant_agent.py:agent",
+    "financial_advisor_agent": "./backend/agents/financial_advisor_agent.py:agent",
+    "reddit_search_agent": "./backend/agents/reddit_search_agent.py:agent",
+    "research_analyst_agent": "./backend/agents/research_analyst_agent.py:agent",
+    "sql_generator_agent": "./backend/agents/sql_generator_agent.py:agent"
+  },
+  "env": ".env",
+  "python_version": "3.12",
+  "dependencies": ["./backend/"]
+}
