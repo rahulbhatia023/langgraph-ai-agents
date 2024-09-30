@@ -51,18 +51,21 @@ if os.path.exists("application.flag"):
 
 with st.sidebar:
     st.markdown(
-        "<h3 style='color:#E9EFEC;font-family: Poppins'>LangGraph Workflow Visualization</h3>",
+        "<h3 style='color:#E9EFEC;font-family: Poppins;text-align: center'>LangGraph Workflow Visualization</h3>",
         unsafe_allow_html=True,
     )
 
-    st.markdown("""
+    st.markdown(
+        """
         <style>
             [data-testid="stImage"] {
                 border-radius: 10px;
                 overflow: hidden;
             }
         </style>
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.image(agent.get_graph().draw_mermaid_png(), use_column_width="always")
 
@@ -70,10 +73,13 @@ st.markdown(f"<h2 class='fontStyle'>{agent_name}</h2>", unsafe_allow_html=True)
 
 config = {"configurable": {"thread_id": "1"}}
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+if "page_messages" not in st.session_state:
+    st.session_state.page_messages = {}
 
-for message in st.session_state.messages:
+if agent_name not in st.session_state.page_messages:
+    st.session_state.page_messages[agent_name] = []
+
+for message in st.session_state.page_messages[agent_name]:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
@@ -86,15 +92,15 @@ def display_message(v):
 
 
 def add_chat_message(role, content):
-    st.session_state.messages.append({"role": role, "content": content})
+    st.session_state.page_messages[agent_name].append(
+        {"role": role, "content": content}
+    )
     with st.chat_message(role):
         st.markdown(content)
 
 
 def stream_events(input):
-    for event in agent.stream(
-            input=input, config=config, stream_mode="updates"
-    ):
+    for event in agent.stream(input=input, config=config, stream_mode="updates"):
         for k, v in event.items():
             display_message(v)
 
@@ -111,5 +117,7 @@ if human_message := st.chat_input():
     )
 
 if os.path.exists("application.flag"):
-    st.markdown("<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True)
+    st.markdown(
+        "<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True
+    )
     components.iframe(src=f"http://localhost:3000?t={int(time.time())}", height=500)

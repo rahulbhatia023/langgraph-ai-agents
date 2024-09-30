@@ -14,14 +14,12 @@ def get_api_key(key_name):
         label=f"{key_name}",
         type="password",
         value=st.session_state[key_name],
-        key=f"{key_name}_input"
+        key=f"{key_name}_input",
     )
 
     if api_key:
         st.session_state[key_name] = api_key
         os.environ[key_name] = api_key
-
-    return api_key
 
 
 def custom_card(title, description):
@@ -99,8 +97,10 @@ st.markdown(
 )
 
 with st.sidebar:
-    openai_api_key = get_api_key("OPENAI_API_KEY")
-    e2b_api_key = get_api_key("E2B_API_KEY")
+    get_api_key("OPENAI_API_KEY")
+    get_api_key("E2B_API_KEY")
+    get_api_key("FINANCIAL_DATASETS_API_KEY")
+    get_api_key("POLYGON_API_KEY")
 
 st.markdown("<h1>Welcome to the World of AI Agents</h1>", unsafe_allow_html=True)
 st.markdown("<h3>Where Intelligence Meets Innovation</h3>", unsafe_allow_html=True)
