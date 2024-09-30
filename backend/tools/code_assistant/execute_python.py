@@ -8,7 +8,7 @@ from langchain_core.tools import tool
 def execute_python(code: str):
     """Execute python code in a Jupyter notebook cell and returns any result, stdout, stderr, display_data, and error."""
 
-    with open("sandbox_id.txt", "r") as f:
+    with open("e2b_sandbox.txt", "r") as f:
         sandbox_id = f.read()
     sandbox = CodeInterpreter.reconnect(sandbox_id)
     execution = sandbox.notebook.exec_cell(code)

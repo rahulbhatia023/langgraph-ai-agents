@@ -19,7 +19,7 @@ class ReactInputSchema(BaseModel):
 def render_react(code: str):
     """Render a react component with the given code and return the render result."""
     cwd = os.getcwd()
-    file_path = os.path.join(cwd, "src", "App.js")
+    file_path = os.path.join(cwd, "react", "src", "App.js")
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(code)
@@ -42,7 +42,7 @@ def render_react(code: str):
 
     try:
         process = subprocess.Popen(
-            ["npm", "start"],
+            ["npm", "--prefix", "./react", "start"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,

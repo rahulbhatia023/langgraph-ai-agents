@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.constants import END
-from langgraph.graph import MessageGraph
+from langgraph.constants import END, START
+from langgraph.graph import StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 
 from backend.tools.code_assistant.execute_python import execute_python
@@ -14,22 +14,29 @@ from backend.tools.code_assistant.send_file_to_user import send_file_to_user
 
 load_dotenv()
 
-tools = [execute_python, render_react, install_npm_dependencies, send_file_to_user]
+tools = [execute_python, render_react, send_file_to_user, install_npm_dependencies]
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0, max_tokens=4096)
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
-llm_with_tools = llm.bind_tools(tools=tools, tool_choice="auto")
+llm_with_tools = llm.bind_tools(tools=tools)
 
-graph = MessageGraph()
-graph.add_node("chatbot", llm_with_tools)
+
+def call_llm(state):
+    messages = state["messages"]
+    response = llm_with_tools.invoke(messages)
+    return {"messages": [response]}
+
+
+graph = StateGraph(MessagesState)
+graph.add_node("agent", call_llm)
 graph.add_node("tools", ToolNode(tools))
 
-graph.set_entry_point("chatbot")
+graph.add_edge(START, "agent")
 graph.add_conditional_edges(
-    source="chatbot",
+    source="agent",
     path=tools_condition,
     path_map={"tools": "tools", END: END},
 )
-graph.add_edge("tools", "chatbot")
+graph.add_edge("tools", "agent")
 
 agent = graph.compile(checkpointer=MemorySaver())

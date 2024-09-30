@@ -3,7 +3,10 @@ import 'tailwindcss/tailwind.css';
 
 const Square = ({ value, onClick }) => {
   return (
-    <button className="w-16 h-16 bg-blue-500 text-white text-2xl font-bold" onClick={onClick}>
+    <button 
+      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold flex items-center justify-center"
+      onClick={onClick}
+    >
       {value}
     </button>
   );
@@ -15,7 +18,7 @@ const Board = () => {
 
   const handleClick = (i) => {
     const newSquares = squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
+    if (calculateWinner(newSquares) || newSquares[i]) {
       return;
     }
     newSquares[i] = xIsNext ? 'X' : 'O';
@@ -37,8 +40,8 @@ const Board = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="status mb-4 text-2xl">{status}</div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="status mb-4 text-xl">{status}</div>
+      <div className="grid grid-cols-3 gap-1">
         {renderSquare(0)}
         {renderSquare(1)}
         {renderSquare(2)}
@@ -75,12 +78,10 @@ const calculateWinner = (squares) => {
 
 const TicTacToe = () => {
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="h-screen flex items-center justify-center bg-gray-100">
       <Board />
     </div>
   );
 };
 
 export default TicTacToe;
-
-render(<TicTacToe />, document.getElementById('root'));
