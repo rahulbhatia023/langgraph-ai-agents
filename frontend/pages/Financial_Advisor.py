@@ -1,12 +1,13 @@
 from datetime import datetime
 
 import streamlit as st
-from langchain_core.messages import SystemMessage, HumanMessage
-from langgraph.graph.state import CompiledStateGraph
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from backend.agents.financial_advisor_agent import agent
 
-system_message = f"""
+agent_name = "Financial Advisor"
+
+system_prompt = f"""
 You are a highly capable financial assistant named FinanceGPT. Your purpose is to provide insightful and concise analysis to help users make informed financial decisions.
 
 Follow these steps:
@@ -26,70 +27,90 @@ Your ultimate goal is to empower users with clear, actionable insights to naviga
 Remember your goal is to answer the users query and provide a clear, actionable answer.
 """
 
+st.set_page_config(page_title=agent_name, page_icon="🤖", layout="wide")
 
-def run_agent(
-    agent_name: str,
-    agent: CompiledStateGraph,
-    system_message: str,
-    nodes_to_display: list[str],
-    update_as_node: str,
-):
-    st.title(agent_name)
+st.markdown(
+    """
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
-    config = {"configurable": {"thread_id": "1"}}
+        .stApp {
+            font-family: 'Poppins';
+            background-color: #16423C;
+        }
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-    def display_message(v):
-        if "messages" in v:
-            m = v["messages"][-1]
-            if (m.type == "ai" and not m.tool_calls) or m.type == "human":
-                add_chat_message(m.type, m.content)
-
-    def add_chat_message(role, content):
-        st.session_state.messages.append({"role": role, "content": content})
-        with st.chat_message(role):
-            st.markdown(content)
-
-    def stream_events(input):
-        if not nodes_to_display:
-            for event in agent.stream(
-                input=input, config=config, stream_mode="updates"
-            ):
-                for k, v in event.items():
-                    display_message(v)
-        else:
-            for event in agent.stream(
-                input=input, config=config, stream_mode="updates"
-            ):
-                for k, v in event.items():
-                    if k in nodes_to_display:
-                        display_message(v)
-
-    if human_message := st.chat_input():
-        add_chat_message("human", human_message)
-        agent.update_state(
-            config,
-            {"messages": [HumanMessage(content=human_message)]},
-            as_node=update_as_node,
-        )
-        stream_events(None)
-    else:
-        stream_events({"messages": [SystemMessage(content=system_message)]})
-
-
-run_agent(
-    agent_name="Financial Advisor Agent",
-    agent=agent,
-    system_message=system_message,
-    nodes_to_display=[],
-    update_as_node="human",
+        .fontStyle {
+            font-family: 'Poppins';
+            color: #C4DAD2;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 with st.sidebar:
-    st.image(agent.get_graph().draw_mermaid_png())
+    st.markdown(
+        "<h3 style='color:#E9EFEC;font-family: Poppins;text-align: center'>LangGraph Workflow Visualization</h3>",
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <style>
+            [data-testid="stImage"] {
+                border-radius: 10px;
+                overflow: hidden;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.image(agent.get_graph().draw_mermaid_png(), use_column_width="always")
+
+st.markdown(f"<h2 class='fontStyle'>{agent_name}</h2>", unsafe_allow_html=True)
+
+config = {"configurable": {"thread_id": "1"}}
+
+if "page_messages" not in st.session_state:
+    st.session_state.page_messages = {}
+
+if agent_name not in st.session_state.page_messages:
+    st.session_state.page_messages[agent_name] = []
+
+for message in st.session_state.page_messages[agent_name]:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+
+def display_message(v):
+    if "messages" in v:
+        m = v["messages"][-1]
+        if (m.type == "ai" and not m.tool_calls) or m.type == "human":
+            add_chat_message(m.type, m.content)
+
+
+def add_chat_message(role, content):
+    st.session_state.page_messages[agent_name].append(
+        {"role": role, "content": content}
+    )
+    with st.chat_message(role):
+        st.markdown(content)
+
+
+def stream_events(input):
+    for event in agent.stream(input=input, config=config, stream_mode="updates"):
+        for k, v in event.items():
+            display_message(v)
+
+
+if human_message := st.chat_input():
+    add_chat_message("human", human_message)
+    stream_events(
+        {
+            "messages": [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=human_message),
+            ]
+        }
+    )
