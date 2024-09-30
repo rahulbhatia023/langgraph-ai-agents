@@ -44,6 +44,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+if os.path.exists("e2b_sandbox.txt"):
+    os.remove("e2b_sandbox.txt")
+if os.path.exists("application.flag"):
+    os.remove("application.flag")
+
 with st.sidebar:
     st.markdown(
         "<h3 style='color:#E9EFEC;font-family: Poppins'>LangGraph Workflow Visualization</h3>",
