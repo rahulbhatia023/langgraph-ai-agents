@@ -18,8 +18,8 @@ class ReactInputSchema(BaseModel):
 @tool("render_react", args_schema=ReactInputSchema, return_direct=True)
 def render_react(code: str):
     """Render a react component with the given code and return the render result."""
-    cwd = os.getcwd()
-    file_path = os.path.join(cwd, "react", "src", "App.js")
+
+    file_path = os.path.join(os.getcwd(), "react", "src", "App.js")
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(code)
@@ -28,6 +28,24 @@ def render_react(code: str):
         subprocess.run(["pkill", "node"], check=True)
     except subprocess.CalledProcessError:
         pass
+
+    def run_command(command):
+        try:
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+            )
+
+            process.wait()
+
+        except Exception as e:
+            return f"An error occurred running command '{' '.join(command)}': {str(e)}"
+
+    run_command(["npm", "--prefix", "./react", "install"])
+    run_command(["npm", "--prefix", "./react", "run", "build"])
 
     output_queue = queue.Queue()
     error_messages = []
@@ -63,7 +81,7 @@ def render_react(code: str):
 
         while True:
             try:
-                line = output_queue.get(timeout=5)  # Wait for 5 seconds for new output
+                line = output_queue.get(timeout=5)
 
                 if success_pattern.search(line):
                     with open("application.flag", "w") as f:
@@ -78,12 +96,10 @@ def render_react(code: str):
                     return "npm start failed with errors:\n" + "\n".join(error_messages)
 
             except queue.Empty:
-                # Check if we've exceeded the timeout
                 if time.time() - start_time > 30:
                     return f"npm start process timed out after 30 seconds"
 
             if not stdout_thread.is_alive() and not stderr_thread.is_alive():
-                # Both output streams have closed
                 break
 
     except Exception as e:
@@ -94,4 +110,5 @@ def render_react(code: str):
 
     with open("application.flag", "w") as f:
         f.write("flag")
+
     return "npm start completed without obvious errors or success messages"

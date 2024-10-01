@@ -4,7 +4,7 @@ import 'tailwindcss/tailwind.css';
 const Square = ({ value, onClick }) => {
   return (
     <button 
-      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold"
+      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold flex items-center justify-center"
       onClick={onClick}
     >
       {value}
@@ -27,12 +27,7 @@ const Board = () => {
   };
 
   const renderSquare = (i) => {
-    return (
-      <Square 
-        value={squares[i]} 
-        onClick={() => handleClick(i)} 
-      />
-    );
+    return <Square value={squares[i]} onClick={() => handleClick(i)} />;
   };
 
   const winner = calculateWinner(squares);
