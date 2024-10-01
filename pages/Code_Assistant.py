@@ -61,6 +61,8 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
     if os.path.exists("application.flag"):
         os.remove("application.flag")
 
+    agent = get_agent()
+
     with st.sidebar:
         st.markdown(
             "<h3 style='color:#E9EFEC;font-family: Poppins;text-align: center'>LangGraph Workflow Visualization</h3>",
@@ -79,7 +81,7 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
             unsafe_allow_html=True,
         )
 
-        st.image(get_agent().get_graph().draw_mermaid_png(), use_column_width="always")
+        st.image(agent.get_graph().draw_mermaid_png(), use_column_width="always")
 
     config = {"configurable": {"thread_id": "1"}}
 
@@ -110,7 +112,7 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
 
 
     def stream_events(input):
-        for event in get_agent().stream(input=input, config=config, stream_mode="updates"):
+        for event in agent.stream(input=input, config=config, stream_mode="updates"):
             for k, v in event.items():
                 display_message(v)
 
