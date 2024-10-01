@@ -133,6 +133,8 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
         with CodeInterpreter(api_key=st.session_state["E2B_API_KEY"]) as sandbox:
             sandbox_id = sandbox.id
             sandbox.keep_alive(300)
+            with open("e2b_api_key.txt", "w") as f:
+                f.write(st.session_state["E2B_API_KEY"])
             with open("e2b_sandbox.txt", "w") as f:
                 f.write(sandbox_id)
 
