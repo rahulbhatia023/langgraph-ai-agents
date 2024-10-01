@@ -5,7 +5,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from backend.agents.code_assistant_agent import agent
+from agents.code_assistant_agent import agent
 
 agent_name = "Code Assistant"
 

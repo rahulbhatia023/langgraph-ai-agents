@@ -4,10 +4,10 @@ from langgraph.constants import START, END
 from langgraph.graph import StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from backend.tools.financial_advisor.last_quote import get_last_quote
-from backend.tools.financial_advisor.line_items import search_line_items
-from backend.tools.financial_advisor.prices import get_prices
-from backend.tools.financial_advisor.ticker_news import get_ticker_news
+from tools.financial_advisor.last_quote import get_last_quote
+from tools.financial_advisor.line_items import search_line_items
+from tools.financial_advisor.prices import get_prices
+from tools.financial_advisor.ticker_news import get_ticker_news
 
 tools = [get_last_quote, get_prices, get_ticker_news, search_line_items]
 

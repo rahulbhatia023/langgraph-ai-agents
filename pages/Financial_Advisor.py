@@ -3,7 +3,7 @@ from datetime import datetime
 import streamlit as st
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from backend.agents.financial_advisor_agent import agent
+from agents.financial_advisor_agent import agent
 
 agent_name = "Financial Advisor"
 
