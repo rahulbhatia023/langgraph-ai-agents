@@ -4,6 +4,7 @@ import re
 import subprocess
 import threading
 import time
+import streamlit as st
 
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
@@ -18,7 +19,7 @@ class ReactInputSchema(BaseModel):
 @tool("render_react", args_schema=ReactInputSchema, return_direct=True)
 def render_react(code: str):
     """Render a react component with the given code and return the render result."""
-
+    st.text("inside render_react")
     file_path = os.path.join(os.getcwd(), "react", "src", "App.js")
 
     with open(file_path, "w", encoding="utf-8") as f:
@@ -30,7 +31,7 @@ def render_react(code: str):
         pass
 
     def run_command(command):
-        os.write(1, f"running command: {' '.join(command)}\n".encode())
+        st.text(f"running command: {' '.join(command)}\n")
         try:
             process = subprocess.Popen(
                 command,
