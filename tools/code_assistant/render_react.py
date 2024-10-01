@@ -30,7 +30,7 @@ def render_react(code: str):
         pass
 
     def run_command(command):
-        print("running command: " + " ".join(command))
+        os.write(1, f"running command: {' '.join(command)}\n".encode())
         try:
             process = subprocess.Popen(
                 command,
@@ -43,6 +43,7 @@ def render_react(code: str):
             process.wait()
 
         except Exception as e:
+            os.write(1, f"An error occurred running command: {' '.join(command)}\n".encode())
             return f"An error occurred running command '{' '.join(command)}': {str(e)}"
 
     run_command(["npm", "--prefix", "./react", "install"])
@@ -87,7 +88,9 @@ def render_react(code: str):
                 if success_pattern.search(line):
                     with open("application.flag", "w") as f:
                         f.write("flag")
-                        print("npm start completed successfully")
+
+                    os.write(1, f"npm start completed successfully\n".encode())
+
                     return "npm start completed successfully"
 
                 if error_pattern.search(line):
@@ -95,12 +98,12 @@ def render_react(code: str):
                     error_messages.append(line)
 
                 if compilation_failed and "webpack compiled with" in line:
-                    print("npm start failed with errors:\n" + "\n".join(error_messages))
+                    os.write(1, f"npm start failed with errors: {' '.join(error_messages)}\n".encode())
                     return "npm start failed with errors:\n" + "\n".join(error_messages)
 
             except queue.Empty:
                 if time.time() - start_time > 30:
-                    print("npm start timed out after 30 seconds")
+                    os.write(1, f"npm start timed out after 30 seconds\n".encode())
                     return f"npm start process timed out after 30 seconds"
 
             if not stdout_thread.is_alive() and not stderr_thread.is_alive():
@@ -110,11 +113,11 @@ def render_react(code: str):
         return f"An error occurred: {str(e)}"
 
     if error_messages:
-        print("npm start failed with errors:\n" + "\n".join(error_messages))
+        os.write(1, f"npm start failed with errors: {'\n'.join(error_messages)}\n".encode())
         return "npm start failed with errors:\n" + "\n".join(error_messages)
 
     with open("application.flag", "w") as f:
         f.write("flag")
 
-    print("npm start completed successfully")
+    os.write(1, f"npm start completed without obvious errors or success messages\n".encode())
     return "npm start completed without obvious errors or success messages"
