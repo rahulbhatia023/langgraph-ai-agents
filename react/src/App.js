@@ -45,7 +45,7 @@ const Board = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="status mb-4 text-xl">{status}</div>
+      <div className="status mb-4 text-xl font-bold">{status}</div>
       <div className="grid grid-cols-3 gap-1">
         {renderSquare(0)}
         {renderSquare(1)}

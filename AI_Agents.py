@@ -1,22 +1,18 @@
-import os
-
 import streamlit as st
 
 
 def get_api_key(key_name):
     if key_name not in st.session_state:
-        st.session_state[key_name] = os.getenv(key_name, "")
+        st.session_state[key_name] = ""
 
     api_key = st.text_input(
         label=f"{key_name}",
-        type="password",
         value=st.session_state[key_name],
-        key=f"{key_name}_input",
+        type="password"
     )
 
     if api_key:
         st.session_state[key_name] = api_key
-        os.environ[key_name] = api_key
 
 
 def custom_card(title, description):
