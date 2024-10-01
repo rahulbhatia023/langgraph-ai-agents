@@ -30,6 +30,7 @@ def render_react(code: str):
         pass
 
     def run_command(command):
+        print("running command: " + " ".join(command))
         try:
             process = subprocess.Popen(
                 command,
@@ -86,6 +87,7 @@ def render_react(code: str):
                 if success_pattern.search(line):
                     with open("application.flag", "w") as f:
                         f.write("flag")
+                        print("npm start completed successfully")
                     return "npm start completed successfully"
 
                 if error_pattern.search(line):
@@ -93,10 +95,12 @@ def render_react(code: str):
                     error_messages.append(line)
 
                 if compilation_failed and "webpack compiled with" in line:
+                    print("npm start failed with errors:\n" + "\n".join(error_messages))
                     return "npm start failed with errors:\n" + "\n".join(error_messages)
 
             except queue.Empty:
                 if time.time() - start_time > 30:
+                    print("npm start timed out after 30 seconds")
                     return f"npm start process timed out after 30 seconds"
 
             if not stdout_thread.is_alive() and not stderr_thread.is_alive():
@@ -106,9 +110,11 @@ def render_react(code: str):
         return f"An error occurred: {str(e)}"
 
     if error_messages:
+        print("npm start failed with errors:\n" + "\n".join(error_messages))
         return "npm start failed with errors:\n" + "\n".join(error_messages)
 
     with open("application.flag", "w") as f:
         f.write("flag")
 
+    print("npm start completed successfully")
     return "npm start completed without obvious errors or success messages"
