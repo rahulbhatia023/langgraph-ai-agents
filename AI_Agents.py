@@ -6,9 +6,7 @@ def get_api_key(key_name):
         st.session_state[key_name] = ""
 
     api_key = st.text_input(
-        label=f"{key_name}",
-        value=st.session_state[key_name],
-        type="password"
+        label=f"{key_name}", value=st.session_state[key_name], type="password"
     )
 
     if api_key:

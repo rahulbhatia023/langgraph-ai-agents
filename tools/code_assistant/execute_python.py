@@ -10,17 +10,21 @@ def execute_python(code: str):
 
     with open("e2b_sandbox.txt", "r") as f:
         sandbox_id = f.read()
-    sandbox = CodeInterpreter.reconnect(sandbox_id)
-    execution = sandbox.notebook.exec_cell(code)
 
-    if execution.error:
-        print(
-            f"There was an error during execution: {execution.error.name}: {execution.error.value}.\n"
-        )
-        return (
-            f"There was an error during execution: {execution.error.name}: {execution.error.value}.\n"
-            f"{execution.error.traceback}"
-        )
+    with open("e2b_sandbox.txt", "r") as f:
+        e2b_api_key = f.read()
+
+    with CodeInterpreter.reconnect(sandbox_id=sandbox_id, api_key=e2b_api_key) as sandbox:
+        execution = sandbox.notebook.exec_cell(code)
+
+        if execution.error:
+            print(
+                f"There was an error during execution: {execution.error.name}: {execution.error.value}.\n"
+            )
+            return (
+                f"There was an error during execution: {execution.error.name}: {execution.error.value}.\n"
+                f"{execution.error.traceback}"
+            )
 
     message = ""
     if execution.results:
