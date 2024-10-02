@@ -27,12 +27,7 @@ const Board = () => {
   };
 
   const renderSquare = (i) => {
-    return (
-      <Square 
-        value={squares[i]} 
-        onClick={() => handleClick(i)} 
-      />
-    );
+    return <Square value={squares[i]} onClick={() => handleClick(i)} />;
   };
 
   const winner = calculateWinner(squares);
@@ -44,7 +39,7 @@ const Board = () => {
   }
 
   return (
-    <div className="flex flex-col items-center mt-8">
+    <div className="flex flex-col items-center">
       <div className="status mb-4 text-xl font-bold">{status}</div>
       <div className="grid grid-cols-3 gap-1">
         {renderSquare(0)}
@@ -83,7 +78,7 @@ const calculateWinner = (squares) => {
 
 const TicTacToe = () => {
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div className="h-screen flex items-center justify-center bg-gray-100">
       <Board />
     </div>
   );

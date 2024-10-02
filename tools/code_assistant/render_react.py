@@ -19,11 +19,6 @@ class ReactInputSchema(BaseModel):
 def render_react(code: str):
     """Render a react component with the given code and return the render result."""
 
-    file_path = os.path.join(os.getcwd(), "react", "src", "App.js")
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(code)
-
     try:
         subprocess.run(["pkill", "node"], check=True)
     except subprocess.CalledProcessError:
@@ -43,6 +38,11 @@ def render_react(code: str):
 
         except Exception as e:
             return f"An error occurred running command '{' '.join(command)}': {str(e)}"
+
+    file_path = os.path.join(os.getcwd(), "react", "src", "App.js")
+    run_command(["chmod", "777", "./react/src/App.js"])
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(code)
 
     run_command(["npm", "--prefix", "./react", "install"])
     run_command(["npm", "--prefix", "./react", "run", "build"])
