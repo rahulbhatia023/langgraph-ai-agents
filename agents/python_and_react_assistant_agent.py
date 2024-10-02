@@ -4,12 +4,12 @@ from langgraph.constants import END, START
 from langgraph.graph import StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from tools.code_assistant.execute_python import execute_python
-from tools.code_assistant.install_npm_dependencies import (
+from tools.python_and_react_assistant.execute_python import execute_python
+from tools.python_and_react_assistant.install_npm_dependencies import (
     install_npm_dependencies,
 )
-from tools.code_assistant.render_react import render_react
-from tools.code_assistant.send_file_to_user import send_file_to_user
+from tools.python_and_react_assistant.render_react import render_react
+from tools.python_and_react_assistant.send_file_to_user import send_file_to_user
 
 
 def get_agent(openai_api_key: str):

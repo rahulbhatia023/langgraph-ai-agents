@@ -14,7 +14,9 @@ def execute_python(code: str):
     with open("e2b_api_key.txt", "r") as f:
         e2b_api_key = f.read()
 
-    with CodeInterpreter.reconnect(sandbox_id=sandbox_id, api_key=e2b_api_key) as sandbox:
+    with CodeInterpreter.reconnect(
+        sandbox_id=sandbox_id, api_key=e2b_api_key
+    ) as sandbox:
         execution = sandbox.notebook.exec_cell(code)
 
         if execution.error:

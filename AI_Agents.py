@@ -1,5 +1,9 @@
 import streamlit as st
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def get_api_key(key_name):
     if key_name not in st.session_state:
@@ -17,7 +21,7 @@ def custom_card(title, description):
     return f"""
     <div class="custom-card">
         <h4>{title}</h4>
-        <p>{description}</p>
+        {"<ul>" + "".join([f"<li>{point}</li>" for point in description]) + "</ul>"}
     </div>
     """
 
@@ -90,6 +94,9 @@ st.markdown(
 with st.sidebar:
     get_api_key("OPENAI_API_KEY")
     get_api_key("E2B_API_KEY")
+    get_api_key("FINANCIAL_DATASETS_API_KEY")
+    get_api_key("POLYGON_API_KEY")
+    get_api_key("TAVILY_API_KEY")
 
 st.markdown("<h1>Welcome to the World of AI Agents</h1>", unsafe_allow_html=True)
 st.markdown("<h3>Where Intelligence Meets Innovation</h3>", unsafe_allow_html=True)
@@ -102,8 +109,28 @@ col11, col12, col13 = container.columns(3)
 with col11:
     st.markdown(
         custom_card(
-            title="Code Assistant",
-            description="AI-powered assistant that integrates Python execution capabilities with React component rendering on the fly, offering a comprehensive environment for data analysis, visualization, and interactive web development.",
+            title="Financial Advisor",
+            description=[
+                "Integrates a stock market API for real-time stock data and financial insights",
+                "Incorporates the Tavily search API for broader web searches",
+                "Provides a comprehensive tool for financial data and information retrieval",
+                "Users should conduct their own research or consult a financial advisor before making decisions",
+            ],
+        ),
+        unsafe_allow_html=True,
+    )
+
+with col12:
+    st.markdown(
+        custom_card(
+            title="Python and React Assistant",
+            description=[
+                "AI-powered assistant with Python execution capabilities",
+                "Integrates real-time React component rendering",
+                "Offers a comprehensive environment for data analysis",
+                "Supports dynamic data visualization",
+                "Facilitates interactive web development",
+            ],
         ),
         unsafe_allow_html=True,
     )

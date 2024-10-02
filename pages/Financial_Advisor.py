@@ -1,28 +1,31 @@
-import os
-import time
+from datetime import datetime
 
 import streamlit as st
-import streamlit.components.v1 as components
-from e2b_code_interpreter import CodeInterpreter
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from agents.code_assistant_agent import get_agent
+from agents.financial_advisor_agent import get_agent
 
-agent_name = "Code Assistant"
+agent_name = "Financial Advisor"
 
-system_prompt = """
-        You are a Python and React expert. You can create React applications and run Python code in a Jupyter notebook. Here are some guidelines for this environment:
-        - The python code runs in jupyter notebook.
-        - Display visualizations using matplotlib or any other visualization library directly in the notebook. don't worry about saving the visualizations to a file.
-        - You have access to the internet and can make api requests.
-        - You also have access to the filesystem and can read/write files.
-        - You can install any pip package when you need. But the usual packages for data analysis are already preinstalled. Use the `!pip install -q package_name` command to install a package.
-        - You can run any python code you want, everything is running in a secure sandbox environment.
-        - NEVER execute provided tools when you are asked to explain your code.
-        - NEVER use `execute_python` tool when you are asked to create a react application. Use `render_react` tool instead.
-        - Prioritize to use tailwindcss for styling your react components.
-        - Always display the code to the user while generating the final response
-        """
+system_prompt = f"""
+    You are a highly capable financial assistant named FinanceGPT. Your purpose is to provide insightful and concise analysis to help users make informed financial decisions.
+    
+    Follow these steps:
+    0. Ask the query from the user
+    1. Identify the relevant financial data needed to answer the query.
+    2. Use the available tools to retrieve the necessary data, such as stock financials, news, or aggregate data.
+    3. Analyze the retrieved data and any generated charts to extract key insights and trends.
+    4. Formulate a concise response that directly addresses the user's question, focusing on the most important findings from your analysis.
+    
+    Remember:
+    - Today's date is {datetime.today().strftime("%Y %m %d")}.
+    - Avoid simply regurgitating the raw data from the tools. Instead, provide a thoughtful interpretation and summary.
+    - If the query cannot be satisfactorily answered using the available tools, kindly inform the user and suggest alternative resources or information they may need.
+    
+    Your ultimate goal is to empower users with clear, actionable insights to navigate the financial landscape effectively.
+    
+    Remember your goal is to answer the users query and provide a clear, actionable answer.
+"""
 
 st.set_page_config(page_title=agent_name, page_icon="🤖", layout="wide")
 
@@ -57,8 +60,15 @@ def api_keys_missing(keys):
     return if_missing
 
 
-if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
-    agent = get_agent(openai_api_key=st.session_state["OPENAI_API_KEY"])
+if not api_keys_missing(
+    [
+        "OPENAI_API_KEY",
+        "TAVILY_API_KEY",
+        "FINANCIAL_DATASETS_API_KEY",
+        "POLYGON_API_KEY",
+    ]
+):
+    agent = get_agent()
 
     with st.sidebar:
         st.markdown(
@@ -90,13 +100,11 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-
     def display_message(v):
         if "messages" in v:
             m = v["messages"][-1]
             if (m.type == "ai" and not m.tool_calls) or m.type == "human":
                 add_chat_message(m.type, m.content)
-
 
     def add_chat_message(role, content):
         st.session_state.page_messages[agent_name].append(
@@ -105,15 +113,12 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
         with st.chat_message(role):
             st.markdown(content)
 
-
     config = {"configurable": {"thread_id": "1"}}
-
 
     def stream_events(input):
         for event in agent.stream(input=input, config=config, stream_mode="updates"):
             for k, v in event.items():
                 display_message(v)
-
 
     if human_message := st.chat_input():
         add_chat_message("human", human_message)
@@ -126,26 +131,3 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
                 ]
             }
         )
-
-        if os.path.exists("application.flag"):
-            st.markdown(
-                "<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True
-            )
-            components.iframe(src=f"http://localhost:3000?t={int(time.time())}", height=500)
-    else:
-        if os.path.exists("e2b_sandbox.txt"):
-            os.remove("e2b_sandbox.txt")
-
-        if os.path.exists("e2b_api_key.txt"):
-            os.remove("e2b_api_key.txt")
-
-        if os.path.exists("application.flag"):
-            os.remove("application.flag")
-
-        with CodeInterpreter(api_key=st.session_state["E2B_API_KEY"]) as sandbox:
-            sandbox_id = sandbox.id
-            sandbox.keep_alive(300)
-            with open("e2b_api_key.txt", "w") as f:
-                f.write(st.session_state["E2B_API_KEY"])
-            with open("e2b_sandbox.txt", "w") as f:
-                f.write(sandbox_id)
