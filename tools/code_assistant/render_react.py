@@ -87,7 +87,7 @@ def render_react(code: str):
                     with open("application.flag", "w") as f:
                         f.write("flag")
 
-                    return f"npm start completed successfully with file path: {file_path}"
+                    return f"npm start completed successfully"
 
                 if error_pattern.search(line):
                     compilation_failed = True
