@@ -49,11 +49,12 @@ st.markdown(f"<h2 class='fontStyle'>{agent_name}</h2>", unsafe_allow_html=True)
 
 
 def api_keys_missing(keys):
+    if_missing = False
     for key in keys:
         if key not in st.session_state or not st.session_state[key]:
             st.error(f"Please enter {key} in the home page.", icon="🚨")
-            return True
-    return False
+            if_missing = True
+    return if_missing
 
 
 if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
@@ -78,8 +79,6 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
         )
 
         st.image(agent.get_graph().draw_mermaid_png(), use_column_width="always")
-
-    config = {"configurable": {"thread_id": "1"}}
 
     if "page_messages" not in st.session_state:
         st.session_state.page_messages = {}
@@ -107,6 +106,9 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
             st.markdown(content)
 
 
+    config = {"configurable": {"thread_id": "1"}}
+
+
     def stream_events(input):
         for event in agent.stream(input=input, config=config, stream_mode="updates"):
             for k, v in event.items():
@@ -115,6 +117,7 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
 
     if human_message := st.chat_input():
         add_chat_message("human", human_message)
+
         stream_events(
             {
                 "messages": [
@@ -123,9 +126,18 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
                 ]
             }
         )
+
+        if os.path.exists("application.flag"):
+            st.markdown(
+                "<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True
+            )
+            components.iframe(src=f"http://localhost:3000?t={int(time.time())}", height=500)
     else:
         if os.path.exists("e2b_sandbox.txt"):
             os.remove("e2b_sandbox.txt")
+
+        if os.path.exists("e2b_api_key.txt"):
+            os.remove("e2b_api_key.txt")
 
         if os.path.exists("application.flag"):
             os.remove("application.flag")
@@ -137,9 +149,3 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
                 f.write(st.session_state["E2B_API_KEY"])
             with open("e2b_sandbox.txt", "w") as f:
                 f.write(sandbox_id)
-
-    if os.path.exists("application.flag"):
-        st.markdown(
-            "<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True
-        )
-        components.iframe(src=f"http://localhost:3000?t={int(time.time())}", height=500)
