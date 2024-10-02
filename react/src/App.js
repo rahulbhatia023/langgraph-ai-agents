@@ -4,7 +4,7 @@ import 'tailwindcss/tailwind.css';
 const Square = ({ value, onClick }) => {
   return (
     <button 
-      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold"
+      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold flex items-center justify-center"
       onClick={onClick}
     >
       {value}
@@ -45,7 +45,7 @@ const Board = () => {
 
   return (
     <div className="flex flex-col items-center mt-8">
-      <div className="text-2xl mb-4">{status}</div>
+      <div className="status mb-4 text-xl font-bold">{status}</div>
       <div className="grid grid-cols-3 gap-1">
         {renderSquare(0)}
         {renderSquare(1)}
