@@ -19,7 +19,9 @@ def send_file_to_user(filepath: str):
     with open("e2b_api_key.txt", "r") as f:
         e2b_api_key = f.read()
 
-    with CodeInterpreter.reconnect(sandbox_id=sandbox_id, api_key=e2b_api_key) as sandbox:
+    with CodeInterpreter.reconnect(
+        sandbox_id=sandbox_id, api_key=e2b_api_key
+    ) as sandbox:
         remote_file_path = "/home/user/" + filepath
         try:
             file_in_bytes = sandbox.download_file(remote_file_path)
