@@ -1,9 +1,5 @@
 import streamlit as st
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 
 def get_api_key(key_name):
     if key_name not in st.session_state:
