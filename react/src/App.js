@@ -4,7 +4,7 @@ import 'tailwindcss/tailwind.css';
 const Square = ({ value, onClick }) => {
   return (
     <button 
-      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold flex items-center justify-center"
+      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold"
       onClick={onClick}
     >
       {value}
@@ -27,7 +27,12 @@ const Board = () => {
   };
 
   const renderSquare = (i) => {
-    return <Square value={squares[i]} onClick={() => handleClick(i)} />;
+    return (
+      <Square 
+        value={squares[i]} 
+        onClick={() => handleClick(i)} 
+      />
+    );
   };
 
   const winner = calculateWinner(squares);
@@ -39,8 +44,8 @@ const Board = () => {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="status mb-4 text-xl">{status}</div>
+    <div className="flex flex-col items-center mt-8">
+      <div className="text-2xl mb-4">{status}</div>
       <div className="grid grid-cols-3 gap-1">
         {renderSquare(0)}
         {renderSquare(1)}
@@ -78,7 +83,7 @@ const calculateWinner = (squares) => {
 
 const TicTacToe = () => {
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
+    <div className="flex justify-center items-center h-screen bg-gray-100">
       <Board />
     </div>
   );

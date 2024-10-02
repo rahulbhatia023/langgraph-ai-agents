@@ -95,8 +95,8 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
     def display_message(v):
         if "messages" in v:
             m = v["messages"][-1]
-            if (m.type == "ai" and not m.tool_calls) or m.type == "human":
-                add_chat_message(m.type, m.content)
+            #if (m.type == "ai" and not m.tool_calls) or m.type == "human":
+            add_chat_message(m.type, m.content)
 
 
     def add_chat_message(role, content):
