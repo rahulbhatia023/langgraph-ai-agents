@@ -1,43 +1,87 @@
-import React from 'react';
+import React, { useState } from 'react';
 import 'tailwindcss/tailwind.css';
 
-const ExcelSheet = () => {
-  const rows = 10;
-  const cols = 5;
-  const headers = ['A', 'B', 'C', 'D', 'E'];
+function Square({ value, onClick }) {
+  return (
+    <button 
+      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold"
+      onClick={onClick}
+    >
+      {value}
+    </button>
+  );
+}
+
+function Board() {
+  const [squares, setSquares] = useState(Array(9).fill(null));
+  const [xIsNext, setXIsNext] = useState(true);
+
+  const handleClick = (i) => {
+    const newSquares = squares.slice();
+    if (calculateWinner(newSquares) || newSquares[i]) {
+      return;
+    }
+    newSquares[i] = xIsNext ? 'X' : 'O';
+    setSquares(newSquares);
+    setXIsNext(!xIsNext);
+  };
+
+  const renderSquare = (i) => {
+    return <Square value={squares[i]} onClick={() => handleClick(i)} />;
+  };
+
+  const winner = calculateWinner(squares);
+  let status;
+  if (winner) {
+    status = 'Winner: ' + winner;
+  } else {
+    status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+  }
 
   return (
-    <div className="p-4">
-      <table className="table-auto border-collapse border border-gray-400">
-        <thead>
-          <tr>
-            {headers.map((header, index) => (
-              <th key={index} className="border border-gray-300 px-4 py-2 bg-gray-200">
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-            <tr key={rowIndex}>
-              {Array.from({ length: cols }).map((_, colIndex) => (
-                <td key={colIndex} className="border border-gray-300 px-4 py-2">
-                  {rowIndex + 1},{headers[colIndex]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="flex flex-col items-center">
+      <div className="status mb-4 text-xl">{status}</div>
+      <div className="grid grid-cols-3 gap-1">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
     </div>
   );
-};
+}
 
-const App = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <ExcelSheet />
-  </div>
-);
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
 
-export default App;
+export default function Game() {
+  return (
+    <div className="game">
+      <div className="game-board">
+        <Board />
+      </div>
+    </div>
+  );
+}
