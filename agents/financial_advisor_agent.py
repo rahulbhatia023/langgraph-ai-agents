@@ -14,6 +14,7 @@ from tools.financial_advisor.ticker_news import TickerNewsTool
 def get_agent():
     polygon_api_key = streamlit.session_state["POLYGON_API_KEY"]
     financial_datasets_api_key = streamlit.session_state["FINANCIAL_DATASETS_API_KEY"]
+    openai_api_key = streamlit.session_state["OPENAI_API_KEY"]
 
     tools = [
         LastQuoteTool(polygon_api_key=polygon_api_key),
@@ -22,9 +23,9 @@ def get_agent():
         SearchLineItemsTool(financial_datasets_api_key=financial_datasets_api_key),
     ]
 
-    llm = ChatOpenAI(
-        model="gpt-4o", api_key=streamlit.session_state["OPENAI_API_KEY"], temperature=0
-    ).bind_tools(tools=tools)
+    llm = ChatOpenAI(model="gpt-4o", api_key=openai_api_key, temperature=0).bind_tools(
+        tools=tools
+    )
 
     def call_llm(state):
         messages = state["messages"]

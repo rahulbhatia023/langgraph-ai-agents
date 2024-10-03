@@ -3,7 +3,6 @@ import time
 
 import streamlit as st
 import streamlit.components.v1 as components
-from e2b_code_interpreter import CodeInterpreter
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from agents.python_and_react_assistant_agent import get_agent
@@ -58,7 +57,7 @@ def api_keys_missing(keys):
 
 
 if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
-    agent = get_agent(openai_api_key=st.session_state["OPENAI_API_KEY"])
+    agent = get_agent()
 
     with st.sidebar:
         st.markdown(
@@ -129,20 +128,6 @@ if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
             components.iframe(
                 src=f"http://localhost:3000?t={int(time.time())}", height=500
             )
-    else:
-        if os.path.exists("e2b_sandbox.txt"):
-            os.remove("e2b_sandbox.txt")
 
-        if os.path.exists("e2b_api_key.txt"):
-            os.remove("e2b_api_key.txt")
-
-        if os.path.exists("application.flag"):
-            os.remove("application.flag")
-
-        with CodeInterpreter(api_key=st.session_state["E2B_API_KEY"]) as sandbox:
-            sandbox_id = sandbox.id
-            sandbox.keep_alive(300)
-            with open("e2b_api_key.txt", "w") as f:
-                f.write(st.session_state["E2B_API_KEY"])
-            with open("e2b_sandbox.txt", "w") as f:
-                f.write(sandbox_id)
+if os.path.exists("application.flag"):
+    os.remove("application.flag")
