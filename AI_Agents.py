@@ -105,7 +105,7 @@ col11, col12, col13 = container.columns(3)
 with col11:
     st.markdown(
         custom_card(
-            title="Financial Advisor",
+            title="Financial Assistant",
             description=[
                 "Integrates a stock market API for real-time stock data and financial insights",
                 "Incorporates the Tavily search API for broader web searches",

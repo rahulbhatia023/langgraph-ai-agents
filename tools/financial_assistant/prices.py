@@ -51,6 +51,7 @@ class PricesTool(BaseTool):
         interval_multiplier: int = 1,
         limit: int = 5000,
     ) -> Union[Dict, str]:
+        print("Inside prices tool")
 
         url = (
             f"{FINANCIAL_DATASETS_BASE_URL}prices"

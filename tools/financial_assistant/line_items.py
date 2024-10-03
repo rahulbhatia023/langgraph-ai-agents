@@ -108,18 +108,6 @@ class SearchLineItems(BaseModel):
         None, description="The end date for the financial data in YYYY-MM-DD format."
     )
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "tickers": ["AAPL", "GOOGL"],
-                "line_items": ["revenue", "net_income", "total_assets"],
-                "period": "annual",
-                "limit": 5,
-                "start_date": "2020-01-01",
-                "end_date": "2024-09-01",
-            }
-        }
-
 
 class SearchLineItemsTool(BaseTool):
     financial_datasets_api_key: str = Field(

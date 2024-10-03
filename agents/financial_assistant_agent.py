@@ -5,22 +5,25 @@ from langgraph.constants import START, END
 from langgraph.graph import StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from tools.financial_advisor.last_quote import LastQuoteTool
-from tools.financial_advisor.line_items import SearchLineItemsTool
-from tools.financial_advisor.prices import PricesTool
-from tools.financial_advisor.ticker_news import TickerNewsTool
+from tools.financial_assistant.last_quote import LastQuoteTool
+from tools.financial_assistant.line_items import SearchLineItemsTool
+from tools.financial_assistant.prices import PricesTool
+from tools.financial_assistant.ticker_news import TickerNewsTool
+from tools.financial_assistant.web_search import WebSearchTool
 
 
 def get_agent():
     polygon_api_key = streamlit.session_state["POLYGON_API_KEY"]
     financial_datasets_api_key = streamlit.session_state["FINANCIAL_DATASETS_API_KEY"]
     openai_api_key = streamlit.session_state["OPENAI_API_KEY"]
+    tavily_api_key = streamlit.session_state["TAVILY_API_KEY"]
 
     tools = [
         LastQuoteTool(polygon_api_key=polygon_api_key),
         PricesTool(financial_datasets_api_key=financial_datasets_api_key),
         TickerNewsTool(polygon_api_key=polygon_api_key),
         SearchLineItemsTool(financial_datasets_api_key=financial_datasets_api_key),
+        WebSearchTool(tavily_api_key=tavily_api_key),
     ]
 
     llm = ChatOpenAI(model="gpt-4o", api_key=openai_api_key, temperature=0).bind_tools(
