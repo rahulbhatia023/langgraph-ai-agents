@@ -76,12 +76,10 @@ function calculateWinner(squares) {
   return null;
 }
 
-export default function Game() {
+export default function TicTacToe() {
   return (
-    <div className="game">
-      <div className="game-board">
-        <Board />
-      </div>
+    <div className="h-screen flex justify-center items-center bg-gray-100">
+      <Board />
     </div>
   );
 }
