@@ -24,8 +24,7 @@ def add_chat_message(agent_name, role, content):
 def display_message(agent_name, v):
     if "messages" in v:
         m = v["messages"][-1]
-        if (m.type == "ai" and not m.tool_calls) or m.type == "human":
-            add_chat_message(agent_name=agent_name, role=m.type, content=m.content)
+        add_chat_message(agent_name=agent_name, role=m.type, content=m.content)
 
 
 def stream_events(agent_name, agent, input):
