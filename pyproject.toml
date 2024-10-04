@@ -15,6 +15,7 @@ streamlit = "^1.38.0"
 poetry-core = "^1.9.0"
 black = "^24.8.0"
 watchdog = "^5.0.3"
+praw = "^7.7.1"
 
 
 [build-system]

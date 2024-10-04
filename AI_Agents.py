@@ -1,16 +1,17 @@
 import streamlit as st
 
 
-def get_api_key(key_name):
-    if key_name not in st.session_state:
-        st.session_state[key_name] = ""
+def get_api_key(keys):
+    for key_name, key_type in keys.items():
+        if key_name not in st.session_state:
+            st.session_state[key_name] = ""
 
-    api_key = st.text_input(
-        label=f"{key_name}", value=st.session_state[key_name], type="password"
-    )
+        api_key = st.text_input(
+            label=f"{key_name}", value=st.session_state[key_name], type=key_type
+        )
 
-    if api_key:
-        st.session_state[key_name] = api_key
+        if api_key:
+            st.session_state[key_name] = api_key
 
 
 def custom_card(title, description):
@@ -88,11 +89,18 @@ st.markdown(
 )
 
 with st.sidebar:
-    get_api_key("OPENAI_API_KEY")
-    get_api_key("E2B_API_KEY")
-    get_api_key("FINANCIAL_DATASETS_API_KEY")
-    get_api_key("POLYGON_API_KEY")
-    get_api_key("TAVILY_API_KEY")
+    get_api_key(
+        {
+            "OPENAI_API_KEY": "password",
+            "E2B_API_KEY": "password",
+            "FINANCIAL_DATASETS_API_KEY": "password",
+            "POLYGON_API_KEY": "password",
+            "TAVILY_API_KEY": "password",
+            "REDDIT_CLIENT_ID": "password",
+            "REDDIT_CLIENT_SECRET": "password",
+            "REDDIT_USER_AGENT": "default",
+        }
+    )
 
 st.markdown("<h1>Welcome to the World of AI Agents</h1>", unsafe_allow_html=True)
 st.markdown("<h3>Where Intelligence Meets Innovation</h3>", unsafe_allow_html=True)
@@ -126,6 +134,21 @@ with col12:
                 "Offers a comprehensive environment for data analysis",
                 "Supports dynamic data visualization",
                 "Facilitates interactive web development",
+            ],
+        ),
+        unsafe_allow_html=True,
+    )
+
+with col13:
+    st.markdown(
+        custom_card(
+            title="Reddit Search",
+            description=[
+                "Searches Reddit for relevant answers to user queries",
+                "Scans multiple subreddits for comprehensive results",
+                "Intelligently analyzes and filters out irrelevant responses",
+                "Consolidates insights from various Reddit communities",
+                "Provides users with accurate and curated information",
             ],
         ),
         unsafe_allow_html=True,
