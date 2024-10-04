@@ -39,7 +39,6 @@ def render_agent_page(
     agent_name: str,
     agent: CompiledStateGraph,
     system_prompt: str,
-    required_api_keys: list[str],
     page_icon: PageIcon = "🤖",
     layout: Layout = "wide",
 ):
@@ -66,47 +65,46 @@ def render_agent_page(
 
     st.markdown(f"<h2 class='fontStyle'>{agent_name}</h2>", unsafe_allow_html=True)
 
-    if not api_keys_missing(required_api_keys):
-        with st.sidebar:
-            st.markdown(
-                "<h3 style='color:#E9EFEC;font-family: Poppins;text-align: center'>LangGraph Workflow Visualization</h3>",
-                unsafe_allow_html=True,
-            )
+    with st.sidebar:
+        st.markdown(
+            "<h3 style='color:#E9EFEC;font-family: Poppins;text-align: center'>LangGraph Workflow Visualization</h3>",
+            unsafe_allow_html=True,
+        )
 
-            st.markdown(
-                """
-                <style>
-                    [data-testid="stImage"] {
-                        border-radius: 10px;
-                        overflow: hidden;
-                    }
-                </style>
-                """,
-                unsafe_allow_html=True,
-            )
+        st.markdown(
+            """
+            <style>
+                [data-testid="stImage"] {
+                    border-radius: 10px;
+                    overflow: hidden;
+                }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
 
-            st.image(agent.get_graph().draw_mermaid_png(), use_column_width="always")
+        st.image(agent.get_graph().draw_mermaid_png(), use_column_width="always")
 
-        if "page_messages" not in st.session_state:
-            st.session_state.page_messages = {}
+    if "page_messages" not in st.session_state:
+        st.session_state.page_messages = {}
 
-        if agent_name not in st.session_state.page_messages:
-            st.session_state.page_messages[agent_name] = []
+    if agent_name not in st.session_state.page_messages:
+        st.session_state.page_messages[agent_name] = []
 
-        for message in st.session_state.page_messages[agent_name]:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+    for message in st.session_state.page_messages[agent_name]:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-        if human_message := st.chat_input():
-            add_chat_message(agent_name=agent_name, role="human", content=human_message)
+    if human_message := st.chat_input():
+        add_chat_message(agent_name=agent_name, role="human", content=human_message)
 
-            stream_events(
-                agent_name=agent_name,
-                agent=agent,
-                input={
-                    "messages": [
-                        SystemMessage(content=system_prompt),
-                        HumanMessage(content=human_message),
-                    ]
-                },
-            )
+        stream_events(
+            agent_name=agent_name,
+            agent=agent,
+            input={
+                "messages": [
+                    SystemMessage(content=system_prompt),
+                    HumanMessage(content=human_message),
+                ]
+            },
+        )
