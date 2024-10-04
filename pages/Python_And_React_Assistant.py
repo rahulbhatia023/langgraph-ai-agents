@@ -5,7 +5,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from agents.python_and_react_assistant_agent import get_agent
-from common.pages_ui import render_agent_page
+from common.pages_ui import render_agent_page, api_keys_missing
 
 agent_name = "Python and React Assistant"
 
@@ -23,18 +23,16 @@ system_prompt = """
         - Always display the code to the user while generating the final response
         """
 
-if os.path.exists("application.flag"):
-    os.remove("application.flag")
+if not api_keys_missing(["OPENAI_API_KEY", "E2B_API_KEY"]):
+    if os.path.exists("application.flag"):
+        os.remove("application.flag")
 
-render_agent_page(
-    agent_name=agent_name,
-    agent=get_agent(),
-    system_prompt=system_prompt,
-    required_api_keys=["OPENAI_API_KEY"],
-)
-
-if os.path.exists("application.flag"):
-    st.markdown(
-        "<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True
+    render_agent_page(
+        agent_name=agent_name, agent=get_agent(), system_prompt=system_prompt
     )
-    components.iframe(src=f"http://localhost:3000?t={int(time.time())}", height=500)
+
+    if os.path.exists("application.flag"):
+        st.markdown(
+            "<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True
+        )
+        components.iframe(src=f"http://localhost:3000?t={int(time.time())}", height=500)

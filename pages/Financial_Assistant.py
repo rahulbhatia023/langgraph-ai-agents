@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from agents.financial_assistant_agent import get_agent
-from common.pages_ui import render_agent_page
+from common.pages_ui import render_agent_page, api_keys_missing
 
 agent_name = "Financial Assistant"
 
@@ -20,14 +20,14 @@ system_prompt = f"""
     Your ultimate goal is to empower users with clear, actionable insights to navigate the financial landscape effectively.
     """
 
-render_agent_page(
-    agent_name=agent_name,
-    agent=get_agent(),
-    system_prompt=system_prompt,
-    required_api_keys=[
+if not api_keys_missing(
+    [
         "OPENAI_API_KEY",
         "FINANCIAL_DATASETS_API_KEY",
         "POLYGON_API_KEY",
         "TAVILY_API_KEY",
-    ],
-)
+    ]
+):
+    render_agent_page(
+        agent_name=agent_name, agent=get_agent(), system_prompt=system_prompt
+    )
