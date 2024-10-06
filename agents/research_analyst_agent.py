@@ -296,6 +296,12 @@ intro_conclusion_instructions = """
 class ResearchAnalystAgent(BaseAgent):
     name = "Research Analyst"
 
+    system_prompt = """
+        You are a research analyst AI agent.
+        Ask for the topic and the number of analysts to be involved in the research.
+        After that, you can start the research process.
+    """
+
     @classmethod
     def get_agent(cls):
         llm = ChatOpenAI(

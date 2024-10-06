@@ -9,5 +9,5 @@ class ResearchAnalystPage(BasePage):
         "OPENAI_API_KEY",
     ]
 
+
 human_message = ResearchAnalystPage.display()
-print(human_message)

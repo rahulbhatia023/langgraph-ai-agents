@@ -14,4 +14,3 @@ class FinancialAssistantPage(BasePage):
 
 
 human_message = FinancialAssistantPage.display()
-print(human_message)

@@ -1,8 +1,9 @@
 import streamlit as st
+from langchain_core.messages import SystemMessage, HumanMessage
 from streamlit.commands.page_config import Layout, PageIcon
 
 from common.agent import BaseAgent
-from common.chat import add_chat_message
+from common.chat import add_chat_message, display_message
 
 
 def keys_missing(required_keys: list[str]):
@@ -106,3 +107,19 @@ class BasePage:
         cls.post_render()
 
         return human_message
+
+    @classmethod
+    def stream_events(cls, human_message):
+        config = {"configurable": {"thread_id": "1"}}
+        for event in cls.agent.get_agent().stream(
+            input={
+                "messages": [
+                    SystemMessage(content=cls.agent.system_prompt),
+                    HumanMessage(content=human_message),
+                ]
+            },
+            config=config,
+            stream_mode="updates",
+        ):
+            for k, v in event.items():
+                display_message(agent_name=cls.agent.name, v=v)

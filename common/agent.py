@@ -11,6 +11,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 
 class BaseAgent:
     name: str = None
+    system_prompt: str = None
     tools: Sequence[BaseTool] = None
 
     @classmethod
