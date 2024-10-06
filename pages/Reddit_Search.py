@@ -11,3 +11,6 @@ class RedditSearchPage(BasePage):
         "REDDIT_CLIENT_SECRET",
         "REDDIT_USER_AGENT",
     ]
+
+human_message = RedditSearchPage.display()
+print(human_message)

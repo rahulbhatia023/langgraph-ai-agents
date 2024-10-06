@@ -12,4 +12,6 @@ class FinancialAssistantPage(BasePage):
         "TAVILY_API_KEY",
     ]
 
-FinancialAssistantPage().display_page()
+
+human_message = FinancialAssistantPage.display()
+print(human_message)

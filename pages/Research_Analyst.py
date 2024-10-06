@@ -8,3 +8,6 @@ class ResearchAnalystPage(BasePage):
     required_keys = [
         "OPENAI_API_KEY",
     ]
+
+human_message = ResearchAnalystPage.display()
+print(human_message)

@@ -13,11 +13,13 @@ class PythonAndReactAssistantPage(BasePage):
 
     required_keys = ["OPENAI_API_KEY", "E2B_API_KEY"]
 
-    def pre_render(self):
+    @classmethod
+    def pre_render(cls):
         if os.path.exists("application.flag"):
             os.remove("application.flag")
 
-    def post_render(self):
+    @classmethod
+    def post_render(cls):
         if os.path.exists("application.flag"):
             st.markdown(
                 "<h3 class='fontStyle'>Application Preview</h3>", unsafe_allow_html=True
@@ -25,3 +27,7 @@ class PythonAndReactAssistantPage(BasePage):
             components.iframe(
                 src=f"http://localhost:3000?t={int(time.time())}", height=500
             )
+
+
+human_message = PythonAndReactAssistantPage.display()
+print(human_message)

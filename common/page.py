@@ -100,10 +100,9 @@ class BasePage:
         pass
 
     @classmethod
-    def display_page(cls):
+    def display(cls):
         cls.pre_render()
         human_message = cls.render()
         cls.post_render()
 
         return human_message
-
