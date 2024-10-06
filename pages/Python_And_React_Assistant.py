@@ -29,4 +29,4 @@ class PythonAndReactAssistantPage(BasePage):
             )
 
 
-human_message = PythonAndReactAssistantPage.display()
+PythonAndReactAssistantPage.display()

@@ -13,4 +13,4 @@ class RedditSearchPage(BasePage):
     ]
 
 
-human_message = RedditSearchPage.display()
+RedditSearchPage.display()

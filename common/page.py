@@ -89,12 +89,25 @@ class BasePage:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
+            config = {"configurable": {"thread_id": "1"}}
+
             if human_message := st.chat_input():
                 add_chat_message(
                     agent_name=cls.agent.name, role="human", content=human_message
                 )
 
-            return human_message
+                for event in cls.agent.get_agent().stream(
+                    input={
+                        "messages": [
+                            SystemMessage(content=cls.agent.system_prompt),
+                            HumanMessage(content=human_message),
+                        ]
+                    },
+                    config=config,
+                    stream_mode="updates",
+                ):
+                    for k, v in event.items():
+                        display_message(agent_name=cls.agent.name, v=v)
 
     @classmethod
     def post_render(cls):
@@ -103,23 +116,5 @@ class BasePage:
     @classmethod
     def display(cls):
         cls.pre_render()
-        human_message = cls.render()
+        cls.render()
         cls.post_render()
-
-        return human_message
-
-    @classmethod
-    def stream_events(cls, human_message):
-        config = {"configurable": {"thread_id": "1"}}
-        for event in cls.agent.get_agent().stream(
-            input={
-                "messages": [
-                    SystemMessage(content=cls.agent.system_prompt),
-                    HumanMessage(content=human_message),
-                ]
-            },
-            config=config,
-            stream_mode="updates",
-        ):
-            for k, v in event.items():
-                display_message(agent_name=cls.agent.name, v=v)

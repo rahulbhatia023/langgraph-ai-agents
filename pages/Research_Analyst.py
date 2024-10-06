@@ -10,4 +10,4 @@ class ResearchAnalystPage(BasePage):
     ]
 
 
-human_message = ResearchAnalystPage.display()
+ResearchAnalystPage.display()
