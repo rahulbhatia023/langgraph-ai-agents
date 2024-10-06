@@ -29,7 +29,6 @@ Output Format:
 import operator
 from typing import List, Annotated
 
-import streamlit as st
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.tools import TavilySearchResults
 from langchain_core.messages import (
@@ -302,17 +301,36 @@ class ResearchAnalystAgent(BaseAgent):
         After that, you can start the research process.
     """
 
+    interrupt_before = ["user_input"]
+
     @classmethod
-    def get_agent(cls):
+    def get_graph(cls):
         llm = ChatOpenAI(
-            model="gpt-4o", api_key=st.session_state["OPENAI_API_KEY"], temperature=0
+            model=cls.model, api_key=cls.api_key, base_url=cls.base_url, temperature=0
         )
 
         graph = StateGraph(ResearchGraphState)
 
         def call_model(state: GenerateAnalystsState):
+            print("call_model")
             response = llm.invoke(state["messages"])
             return {"messages": [response]}
+
+        def user_input(state: GenerateAnalystsState):
+            print("user_input")
+            last_message = state["messages"][-1]
+            structured_llm = llm.with_structured_output(UserInput)
+
+            prompt = """
+            Below is the input from the user:
+            {last_message}
+
+            Fetch the topic and number of analysts from the user's input.
+            """
+
+            response = structured_llm.invoke(prompt.format(last_message=last_message))
+
+            return {"topic": response.topic, "max_analysts": response.max_analysts}
 
         def create_analysts(state: GenerateAnalystsState):
             """Create analysts"""
@@ -334,6 +352,8 @@ class ResearchAnalystAgent(BaseAgent):
                 [SystemMessage(content=system_message)]
                 + [HumanMessage(content="Generate the set of analysts.")]
             )
+
+            print(analysts)
 
             prompt_analysts_details = """
             Below are the details of the analysts:
@@ -623,6 +643,7 @@ class ResearchAnalystAgent(BaseAgent):
             ]
 
         graph.add_node("agent", call_model)
+        graph.add_node("user_input", user_input)
         graph.add_node("create_analysts", create_analysts)
         graph.add_node("conduct_interview", interview_builder.compile())
         graph.add_node("write_report", write_report)
@@ -631,7 +652,8 @@ class ResearchAnalystAgent(BaseAgent):
         graph.add_node("finalize_report", finalize_report)
 
         graph.add_edge(START, "agent")
-        graph.add_edge("agent", "create_analysts")
+        graph.add_edge("agent", "user_input")
+        graph.add_edge("user_input", "create_analysts")
         graph.add_conditional_edges("create_analysts", initiate_all_interviews)
         graph.add_edge("conduct_interview", "write_report")
         graph.add_edge("conduct_interview", "write_introduction")
@@ -642,4 +664,6 @@ class ResearchAnalystAgent(BaseAgent):
         )
         graph.add_edge("finalize_report", END)
 
-        return graph.compile(checkpointer=MemorySaver())
+        return graph.compile(
+            interrupt_before=cls.interrupt_before, checkpointer=MemorySaver()
+        )

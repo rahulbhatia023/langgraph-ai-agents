@@ -1,5 +1,6 @@
 import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
+from langgraph.constants import START
 from streamlit.commands.page_config import Layout, PageIcon
 
 from common.agent import BaseAgent
@@ -17,9 +18,10 @@ def keys_missing(required_keys: list[str]):
 
 class BasePage:
     agent: BaseAgent = None
-    required_keys: list[str] = None
+    required_keys: list[str] = []
     page_icon: PageIcon = "🤖"
     layout: Layout = "wide"
+    update_as_node = "agent"
 
     @classmethod
     def pre_render(cls):
@@ -28,6 +30,7 @@ class BasePage:
     @classmethod
     def render(cls):
         if cls.required_keys and not keys_missing(cls.required_keys):
+            agent_graph = cls.agent.get_graph()
 
             st.set_page_config(
                 page_title=cls.agent.name, page_icon=cls.page_icon, layout=cls.layout
@@ -75,7 +78,7 @@ class BasePage:
                 )
 
                 st.image(
-                    cls.agent.get_agent().get_graph().draw_mermaid_png(),
+                    agent_graph.get_graph().draw_mermaid_png(),
                     use_column_width="always",
                 )
 
@@ -96,18 +99,32 @@ class BasePage:
                     agent_name=cls.agent.name, role="human", content=human_message
                 )
 
-                for event in cls.agent.get_agent().stream(
-                    input={
-                        "messages": [
-                            SystemMessage(content=cls.agent.system_prompt),
-                            HumanMessage(content=human_message),
-                        ]
-                    },
-                    config=config,
-                    stream_mode="updates",
-                ):
-                    for k, v in event.items():
-                        display_message(agent_name=cls.agent.name, v=v)
+                if len(st.session_state.page_messages[cls.agent.name]) > 1:
+                    agent_graph.update_state(
+                        config=config,
+                        values={
+                            "messages": [
+                                HumanMessage(content=human_message),
+                            ]
+                        },
+                        as_node=cls.update_as_node,
+                    )
+
+                    for event in agent_graph.stream(
+                        input=None,
+                        config=config,
+                        stream_mode="updates",
+                    ):
+                        for k, v in event.items():
+                            display_message(agent_name=cls.agent.name, v=v)
+                else:
+                    for event in agent_graph.stream(
+                        input={"messages": [SystemMessage(content=cls.agent.system_prompt), HumanMessage(content=human_message)]},
+                        config=config,
+                        stream_mode="updates",
+                    ):
+                        for k, v in event.items():
+                            display_message(agent_name=cls.agent.name, v=v)
 
     @classmethod
     def post_render(cls):
