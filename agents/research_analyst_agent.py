@@ -301,7 +301,7 @@ class ResearchAnalystAgent(BaseAgent):
         After that, you can start the research process.
     """
 
-    interrupt_before = ["user_input"]
+    interrupt_before = "user_input"
 
     @classmethod
     def get_graph(cls):
@@ -312,12 +312,10 @@ class ResearchAnalystAgent(BaseAgent):
         graph = StateGraph(ResearchGraphState)
 
         def call_model(state: GenerateAnalystsState):
-            print("call_model")
             response = llm.invoke(state["messages"])
             return {"messages": [response]}
 
         def user_input(state: GenerateAnalystsState):
-            print("user_input")
             last_message = state["messages"][-1]
             structured_llm = llm.with_structured_output(UserInput)
 
@@ -352,8 +350,6 @@ class ResearchAnalystAgent(BaseAgent):
                 [SystemMessage(content=system_message)]
                 + [HumanMessage(content="Generate the set of analysts.")]
             )
-
-            print(analysts)
 
             prompt_analysts_details = """
             Below are the details of the analysts:
@@ -665,5 +661,5 @@ class ResearchAnalystAgent(BaseAgent):
         graph.add_edge("finalize_report", END)
 
         return graph.compile(
-            interrupt_before=cls.interrupt_before, checkpointer=MemorySaver()
+            interrupt_before=[cls.interrupt_before], checkpointer=MemorySaver()
         )

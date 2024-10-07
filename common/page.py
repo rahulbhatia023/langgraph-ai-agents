@@ -1,10 +1,9 @@
 import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
-from langgraph.constants import START
 from streamlit.commands.page_config import Layout, PageIcon
 
 from common.agent import BaseAgent
-from common.chat import add_chat_message, display_message
+from common.chat import add_chat_message
 
 
 def keys_missing(required_keys: list[str]):
@@ -21,11 +20,61 @@ class BasePage:
     required_keys: list[str] = []
     page_icon: PageIcon = "🤖"
     layout: Layout = "wide"
-    update_as_node = "agent"
 
     @classmethod
     def pre_render(cls):
         pass
+
+    @classmethod
+    def stream_events(cls, agent_graph, human_message):
+        config = {"configurable": {"thread_id": "1"}}
+
+        def is_first_human_message():
+            for message in st.session_state.page_messages[cls.agent.name]:
+                if message.get("role") == "human":
+                    return False
+            return True
+
+        if human_message:
+            if is_first_human_message():
+                agent_input = {
+                    "messages": [
+                        SystemMessage(content=cls.agent.system_prompt),
+                        HumanMessage(content=human_message),
+                    ]
+                }
+            elif not cls.agent.interrupt_before:
+                agent_input = {
+                    "messages": [
+                        HumanMessage(content=human_message),
+                    ]
+                }
+            else:
+                agent_input = None
+                agent_graph.update_state(
+                    config=config,
+                    values={"messages": [HumanMessage(content=human_message)]},
+                    as_node="agent",
+                )
+
+            add_chat_message(
+                agent_name=cls.agent.name, role="human", content=human_message
+            )
+
+            for event in agent_graph.stream(
+                input=agent_input,
+                config=config,
+                stream_mode="updates",
+            ):
+                for k, v in event.items():
+                    if "messages" in v:
+                        m = v["messages"][-1]
+                        if (m.type == "ai" and not m.tool_calls) or m.type == "human":
+                            add_chat_message(
+                                agent_name=cls.agent.name,
+                                role=m.type,
+                                content=m.content,
+                            )
 
     @classmethod
     def render(cls):
@@ -92,39 +141,7 @@ class BasePage:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
 
-            config = {"configurable": {"thread_id": "1"}}
-
-            if human_message := st.chat_input():
-                add_chat_message(
-                    agent_name=cls.agent.name, role="human", content=human_message
-                )
-
-                if len(st.session_state.page_messages[cls.agent.name]) > 1:
-                    agent_graph.update_state(
-                        config=config,
-                        values={
-                            "messages": [
-                                HumanMessage(content=human_message),
-                            ]
-                        },
-                        as_node=cls.update_as_node,
-                    )
-
-                    for event in agent_graph.stream(
-                        input=None,
-                        config=config,
-                        stream_mode="updates",
-                    ):
-                        for k, v in event.items():
-                            display_message(agent_name=cls.agent.name, v=v)
-                else:
-                    for event in agent_graph.stream(
-                        input={"messages": [SystemMessage(content=cls.agent.system_prompt), HumanMessage(content=human_message)]},
-                        config=config,
-                        stream_mode="updates",
-                    ):
-                        for k, v in event.items():
-                            display_message(agent_name=cls.agent.name, v=v)
+            cls.stream_events(agent_graph=agent_graph, human_message=st.chat_input())
 
     @classmethod
     def post_render(cls):
