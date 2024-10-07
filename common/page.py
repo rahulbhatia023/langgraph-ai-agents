@@ -75,12 +75,12 @@ class BasePage:
 
     @classmethod
     def render(cls):
-        if "graphs" not in st.session_state:
-            st.session_state.graphs = {}
-        if cls.agent.name not in st.session_state.graphs:
-            st.session_state.graphs[cls.agent.name] = cls.agent.get_graph()
-
         if cls.required_keys and not keys_missing(cls.required_keys):
+            if "graphs" not in st.session_state:
+                st.session_state.graphs = {}
+            if cls.agent.name not in st.session_state.graphs:
+                st.session_state.graphs[cls.agent.name] = cls.agent.get_graph()
+
             agent_graph = st.session_state.graphs[cls.agent.name]
 
             st.set_page_config(
