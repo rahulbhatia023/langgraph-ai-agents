@@ -3,7 +3,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from streamlit.commands.page_config import Layout, PageIcon
 
 from common.agent import BaseAgent
-from common.chat import add_chat_message
+from common.chat import add_chat_message, display_message
 
 
 def keys_missing(required_keys: list[str]):
@@ -67,19 +67,21 @@ class BasePage:
                 stream_mode="updates",
             ):
                 for k, v in event.items():
-                    if "messages" in v:
-                        m = v["messages"][-1]
-                        if (m.type == "ai" and not m.tool_calls) or m.type == "human":
-                            add_chat_message(
-                                agent_name=cls.agent.name,
-                                role=m.type,
-                                content=m.content,
-                            )
+                    if cls.agent.nodes_to_display:
+                        if k in cls.agent.nodes_to_display:
+                            display_message(agent_name=cls.agent.name, v=v)
+                    else:
+                        display_message(agent_name=cls.agent.name, v=v)
 
     @classmethod
     def render(cls):
+        if "graphs" not in st.session_state:
+            st.session_state.graphs = {}
+        if cls.agent.name not in st.session_state.graphs:
+            st.session_state.graphs[cls.agent.name] = cls.agent.get_graph()
+
         if cls.required_keys and not keys_missing(cls.required_keys):
-            agent_graph = cls.agent.get_graph()
+            agent_graph = st.session_state.graphs[cls.agent.name]
 
             st.set_page_config(
                 page_title=cls.agent.name, page_icon=cls.page_icon, layout=cls.layout

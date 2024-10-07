@@ -1,5 +1,6 @@
 from typing import Sequence
 
+import streamlit as st
 from langchain_core.tools import BaseTool
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
@@ -12,11 +13,12 @@ class BaseAgent:
     name: str = None
     system_prompt: str = None
     interrupt_before: list[str] = []
+    nodes_to_display = []
     tools: Sequence[BaseTool] = []
 
-    model = "llama3.1:8b"
-    api_key = "ollama"
-    base_url = "http://localhost:11434/v1"
+    model = "gpt-4o"
+    api_key = st.session_state["OPENAI_API_KEY"]
+    base_url = "https://api.openai.com/v1"
 
     @classmethod
     def get_graph(cls):

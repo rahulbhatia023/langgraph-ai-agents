@@ -303,6 +303,8 @@ class ResearchAnalystAgent(BaseAgent):
 
     interrupt_before = "user_input"
 
+    nodes_to_display = ["agent", "create_analysts", "finalize_report"]
+
     @classmethod
     def get_graph(cls):
         llm = ChatOpenAI(
