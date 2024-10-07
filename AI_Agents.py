@@ -153,3 +153,20 @@ with col13:
         ),
         unsafe_allow_html=True,
     )
+
+col21, _, _ = container.columns(3)
+
+with col21:
+    st.markdown(
+        custom_card(
+            title="Research Analyst",
+            description=[
+                "Customizes the research process with AI analysts",
+                "Assembles analysts based on user-selected sources and topics",
+                "Conducts in-depth, multi-turn interviews with an expert AI",
+                "Gathers information in parallel for efficiency",
+                "Synthesizes insights into a final report",
+            ],
+        ),
+        unsafe_allow_html=True,
+    )

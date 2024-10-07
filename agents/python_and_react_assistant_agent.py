@@ -1,11 +1,7 @@
-import streamlit
+import streamlit as st
 from e2b_code_interpreter import CodeInterpreter
-from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.constants import END, START
-from langgraph.graph import StateGraph, MessagesState
-from langgraph.prebuilt import ToolNode, tools_condition
 
+from common.agent import BaseAgent
 from tools.python_and_react_assistant.execute_python import ExecutePythonTool
 from tools.python_and_react_assistant.install_npm_dependencies import (
     install_npm_dependencies,
@@ -14,47 +10,32 @@ from tools.python_and_react_assistant.render_react import render_react
 from tools.python_and_react_assistant.send_file_to_user import SendFileToUserTool
 
 
-def get_agent():
-    e2b_api_key = streamlit.session_state["E2B_API_KEY"]
-    openai_api_key = streamlit.session_state["OPENAI_API_KEY"]
+class PythonAndReactAssistantAgent(BaseAgent):
+    name = "Python and React Assistant"
 
-    if (
-        "E2B_SANDBOX_ID" not in streamlit.session_state
-        or not streamlit.session_state["E2B_SANDBOX_ID"]
-    ):
-        with CodeInterpreter(api_key=e2b_api_key) as sandbox:
-            sandbox_id = sandbox.id
-            sandbox.keep_alive(300)
-            streamlit.session_state["E2B_SANDBOX_ID"] = sandbox_id
-
-    e2b_sandbox_id = streamlit.session_state["E2B_SANDBOX_ID"]
+    system_prompt = """
+            You are a Python and React expert. You can create React applications and run Python code in a Jupyter notebook. Here are some guidelines for this environment:
+            - The python code runs in jupyter notebook.
+            - Display visualizations using matplotlib or any other visualization library directly in the notebook. don't worry about saving the visualizations to a file.
+            - You have access to the internet and can make api requests.
+            - You also have access to the filesystem and can read/write files.
+            - You can install any pip package when you need. But the usual packages for data analysis are already preinstalled. Use the `!pip install -q package_name` command to install a package.
+            - You can run any python code you want, everything is running in a secure sandbox environment.
+            - NEVER execute provided tools when you are asked to explain your code.
+            - NEVER use `execute_python` tool when you are asked to create a react application. Use `render_react` tool instead.
+            - Prioritize to use tailwindcss for styling your react components.
+            - Always display the code to the user while generating the final response
+    """
 
     tools = [
-        ExecutePythonTool(e2b_sandbox_id=e2b_sandbox_id, e2b_api_key=e2b_api_key),
+        ExecutePythonTool(
+            e2b_sandbox_id=st.session_state.get("E2B_SANDBOX_ID", ""),
+            e2b_api_key=st.session_state["E2B_API_KEY"],
+        ),
         render_react,
-        SendFileToUserTool(e2b_sandbox_id=e2b_sandbox_id, e2b_api_key=e2b_api_key),
+        SendFileToUserTool(
+            e2b_sandbox_id=st.session_state.get("E2B_SANDBOX_ID", ""),
+            e2b_api_key=st.session_state["E2B_API_KEY"],
+        ),
         install_npm_dependencies,
     ]
-
-    llm = ChatOpenAI(model="gpt-4o", api_key=openai_api_key, temperature=0).bind_tools(
-        tools=tools
-    )
-
-    def call_llm(state):
-        messages = state["messages"]
-        response = llm.invoke(messages)
-        return {"messages": [response]}
-
-    graph = StateGraph(MessagesState)
-    graph.add_node("agent", call_llm)
-    graph.add_node("tools", ToolNode(tools))
-
-    graph.add_edge(START, "agent")
-    graph.add_conditional_edges(
-        source="agent",
-        path=tools_condition,
-        path_map={"tools": "tools", END: END},
-    )
-    graph.add_edge("tools", "agent")
-
-    return graph.compile(checkpointer=MemorySaver())

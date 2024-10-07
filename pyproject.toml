@@ -16,6 +16,8 @@ poetry-core = "^1.9.0"
 black = "^24.8.0"
 watchdog = "^5.0.3"
 praw = "^7.7.1"
+langchain-community = "^0.3.1"
+wikipedia = "^1.4.0"
 
 
 [build-system]
