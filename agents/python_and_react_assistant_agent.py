@@ -1,5 +1,4 @@
 import streamlit as st
-from e2b_code_interpreter import CodeInterpreter
 
 from common.agent import BaseAgent
 from tools.python_and_react_assistant.execute_python import ExecutePythonTool
