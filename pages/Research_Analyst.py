@@ -3,7 +3,7 @@ from common.page import BasePage
 
 
 class ResearchAnalystPage(BasePage):
-    agent = ResearchAnalystAgent()
+    agent = ResearchAnalystAgent
 
     required_keys = [
         "OPENAI_API_KEY",

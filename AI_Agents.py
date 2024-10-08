@@ -113,6 +113,21 @@ col11, col12, col13 = container.columns(3)
 with col11:
     st.markdown(
         custom_card(
+            title="Data Query Assistant",
+            description=[
+                "Bridges the gap between natural language questions and datasets",
+                "Allows users to upload SQLite databases or CSV files",
+                "Translates user questions into SQL queries",
+                "Executes SQL queries on the provided dataset",
+                "Formats query results into human-readable responses",
+            ],
+        ),
+        unsafe_allow_html=True,
+    )
+
+with col12:
+    st.markdown(
+        custom_card(
             title="Financial Assistant",
             description=[
                 "Integrates a stock market API for real-time stock data and financial insights",
@@ -124,7 +139,7 @@ with col11:
         unsafe_allow_html=True,
     )
 
-with col12:
+with col13:
     st.markdown(
         custom_card(
             title="Python and React Assistant",
@@ -139,7 +154,9 @@ with col12:
         unsafe_allow_html=True,
     )
 
-with col13:
+col21, col22, _ = container.columns(3)
+
+with col21:
     st.markdown(
         custom_card(
             title="Reddit Search",
@@ -154,9 +171,7 @@ with col13:
         unsafe_allow_html=True,
     )
 
-col21, _, _ = container.columns(3)
-
-with col21:
+with col22:
     st.markdown(
         custom_card(
             title="Research Analyst",
