@@ -53,8 +53,9 @@ class BasePage:
                 agent_input = None
                 agent_graph.update_state(
                     config=config,
-                    values={"messages": [HumanMessage(content=human_message)]},
-                    as_node="agent",
+                    values={"messages": [HumanMessage(content=human_message)]}
+                    | cls.agent.update_graph_state(human_message),
+                    as_node=cls.agent.update_as_node,
                 )
 
             add_chat_message(

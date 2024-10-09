@@ -13,12 +13,17 @@ class BaseAgent:
     name: str = None
     system_prompt: str = None
     interrupt_before: list[str] = []
+    update_as_node: str = None
     nodes_to_display = []
     tools: Sequence[BaseTool] = []
 
     model = "gpt-4o"
     api_key = st.session_state["OPENAI_API_KEY"]
     base_url = "https://api.openai.com/v1"
+
+    @classmethod
+    def update_graph_state(cls, human_message):
+        pass
 
     @classmethod
     def get_graph(cls):
