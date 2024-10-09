@@ -1,7 +1,7 @@
 import operator
 from typing import Dict, Any, List, Annotated
 
-import requests
+import streamlit
 from langchain_core.messages import AIMessage
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -11,13 +11,11 @@ from langgraph.constants import START, END
 from langgraph.graph import MessagesState, StateGraph
 
 from common.agent import BaseAgent
-
-SQLITE_DB_ENDPOINT_URL = "http://0.0.0.0:3001"
+from common.sqlite import get_schema, execute_query
 
 
 class InputState(MessagesState):
     question: str
-    uuid: str
     parsed_question: Dict[str, Any]
     unique_nouns: List[str]
     sql_query: str
@@ -48,10 +46,7 @@ class DataQueryAssistantAgent(BaseAgent):
 
     @classmethod
     def update_graph_state(cls, human_message):
-        return {
-            "question": human_message,
-            "uuid": "921c838c-541d-4361-8c96-70cb23abd9f5",
-        }
+        return {"question": human_message}
 
     @classmethod
     def get_graph(cls):
@@ -63,34 +58,14 @@ class DataQueryAssistantAgent(BaseAgent):
             response = llm.invoke(state["messages"])
             return {"messages": [response]}
 
-        def get_schema(uuid: str) -> str:
-            """Retrieve the database schema."""
-            try:
-                response = requests.get(f"{SQLITE_DB_ENDPOINT_URL}/get-schema/{uuid}")
-                response.raise_for_status()
-                return response.json()["schema"]
-            except requests.RequestException as e:
-                raise Exception(f"Error fetching schema: {str(e)}")
-
-        def execute_query(uuid: str, query: str) -> List[Any]:
-            """Execute SQL query on the remote database and return results."""
-            try:
-                response = requests.post(
-                    f"{SQLITE_DB_ENDPOINT_URL}/execute-query",
-                    json={"uuid": uuid, "query": query},
-                )
-                response.raise_for_status()
-                return response.json()["results"]
-            except requests.RequestException as e:
-                raise Exception(f"Error executing query: {str(e)}")
-
         def ask_question(state):
             pass
 
         def parse_question(state):
             """Parse user question and identify relevant tables and columns."""
             question = state["question"]
-            schema = get_schema(state["uuid"])
+
+            schema = get_schema(sqlite_file = streamlit.session_state["uploaded_file"][cls.name])
 
             prompt = ChatPromptTemplate.from_messages(
                 [
@@ -148,7 +123,7 @@ class DataQueryAssistantAgent(BaseAgent):
                 if noun_columns:
                     column_names = ", ".join(f"`{col}`" for col in noun_columns)
                     query = f"SELECT DISTINCT {column_names} FROM `{table_name}`"
-                    results = execute_query(state["uuid"], query)
+                    results = execute_query(sqlite_file = streamlit.session_state["uploaded_file"][cls.name], query=query)
                     for row in results:
                         unique_nouns.update(str(value) for value in row if value)
 
@@ -163,7 +138,7 @@ class DataQueryAssistantAgent(BaseAgent):
             if not parsed_question["is_relevant"]:
                 return {"sql_query": "NOT_RELEVANT", "is_relevant": False}
 
-            schema = get_schema(state["uuid"])
+            schema = get_schema(sqlite_file = streamlit.session_state["uploaded_file"][cls.name])
 
             prompt = ChatPromptTemplate.from_messages(
                 [
@@ -238,7 +213,7 @@ class DataQueryAssistantAgent(BaseAgent):
             if sql_query == "NOT_RELEVANT":
                 return {"sql_query": "NOT_RELEVANT", "sql_valid": False}
 
-            schema = get_schema(state["uuid"])
+            schema = get_schema(sqlite_file = streamlit.session_state["uploaded_file"][cls.name])
 
             prompt = ChatPromptTemplate.from_messages(
                 [
@@ -318,13 +293,12 @@ class DataQueryAssistantAgent(BaseAgent):
         def execute_sql(state: dict) -> dict:
             """Execute SQL query and return results."""
             query = state["sql_query"]
-            uuid = state["uuid"]
 
             if query == "NOT_RELEVANT":
                 return {"results": "NOT_RELEVANT"}
 
             try:
-                results = execute_query(uuid, query)
+                results = execute_query(sqlite_file = streamlit.session_state["uploaded_file"][cls.name], query=query)
                 return {"results": results}
             except Exception as e:
                 return {"error": str(e)}
