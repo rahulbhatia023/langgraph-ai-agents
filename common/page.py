@@ -53,8 +53,9 @@ class BasePage:
                 agent_input = None
                 agent_graph.update_state(
                     config=config,
-                    values={"messages": [HumanMessage(content=human_message)]},
-                    as_node="agent",
+                    values={"messages": [HumanMessage(content=human_message)]}
+                    | cls.agent.update_graph_state(human_message),
+                    as_node=cls.agent.update_as_node,
                 )
 
             add_chat_message(
@@ -76,6 +77,11 @@ class BasePage:
     @classmethod
     def render(cls):
         if cls.required_keys and not keys_missing(cls.required_keys):
+            if "uploaded_file" not in st.session_state:
+                st.session_state.uploaded_file = {}
+            if cls.agent.name not in st.session_state.uploaded_file:
+                st.session_state.uploaded_file[cls.agent.name] = None
+
             if "graphs" not in st.session_state:
                 st.session_state.graphs = {}
             if cls.agent.name not in st.session_state.graphs:

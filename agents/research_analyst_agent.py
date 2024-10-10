@@ -301,7 +301,9 @@ class ResearchAnalystAgent(BaseAgent):
         After that, you can start the research process.
     """
 
-    interrupt_before = "user_input"
+    interrupt_before = ["user_input"]
+
+    update_as_node = "agent"
 
     nodes_to_display = ["agent", "create_analysts", "finalize_report"]
 
@@ -663,5 +665,5 @@ class ResearchAnalystAgent(BaseAgent):
         graph.add_edge("finalize_report", END)
 
         return graph.compile(
-            interrupt_before=[cls.interrupt_before], checkpointer=MemorySaver()
+            interrupt_before=cls.interrupt_before, checkpointer=MemorySaver()
         )
