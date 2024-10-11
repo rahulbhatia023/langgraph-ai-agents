@@ -39,13 +39,13 @@ def render_react(code: str):
         except Exception as e:
             return f"An error occurred running command '{' '.join(command)}': {str(e)}"
 
-    file_path = os.path.join(os.getcwd(), "react", "src", "App.js")
-    run_command(["chmod", "777", "./react/src/App.js"])
+    file_path = os.path.join(os.getcwd(), "common", "react", "src", "App.js")
+    run_command(["chmod", "777", "./common/react/src/App.js"])
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(code)
 
-    run_command(["npm", "--prefix", "./react", "install"])
-    run_command(["npm", "--prefix", "./react", "run", "build"])
+    run_command(["npm", "--prefix", "./common/react", "install"])
+    run_command(["npm", "--prefix", "./common/react", "run", "build"])
 
     output_queue = queue.Queue()
     error_messages = []
@@ -60,7 +60,7 @@ def render_react(code: str):
 
     try:
         process = subprocess.Popen(
-            ["npm", "--prefix", "./react", "start"],
+            ["npm", "--prefix", "./common/react", "start"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,

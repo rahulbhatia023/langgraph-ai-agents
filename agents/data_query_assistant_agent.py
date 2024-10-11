@@ -65,14 +65,17 @@ class DataQueryAssistantAgent(BaseAgent):
             """Parse user question and identify relevant tables and columns."""
             question = state["question"]
 
-            schema = get_schema(sqlite_file = streamlit.session_state["uploaded_file"][cls.name])
+            schema = get_schema(
+                sqlite_file=streamlit.session_state["uploaded_file"][cls.name]
+            )
 
             prompt = ChatPromptTemplate.from_messages(
                 [
                     (
                         "system",
-                        """You are a data analyst that can help summarize SQL tables and parse user questions about a database. 
-                        Given the question and database schema, identify the relevant tables and columns. 
+                        """
+                                You are a data analyst that can help summarize SQL tables and parse user questions about a database. 
+                                Given the question and database schema, identify the relevant tables and columns. 
                                 If the question is not relevant to the database or if there is not enough information to answer the question, set is_relevant to false.
         
                                 Your response should be in the following JSON format:
@@ -123,7 +126,10 @@ class DataQueryAssistantAgent(BaseAgent):
                 if noun_columns:
                     column_names = ", ".join(f"`{col}`" for col in noun_columns)
                     query = f"SELECT DISTINCT {column_names} FROM `{table_name}`"
-                    results = execute_query(sqlite_file = streamlit.session_state["uploaded_file"][cls.name], query=query)
+                    results = execute_query(
+                        sqlite_file=streamlit.session_state["uploaded_file"][cls.name],
+                        query=query,
+                    )
                     for row in results:
                         unique_nouns.update(str(value) for value in row if value)
 
@@ -138,7 +144,9 @@ class DataQueryAssistantAgent(BaseAgent):
             if not parsed_question["is_relevant"]:
                 return {"sql_query": "NOT_RELEVANT", "is_relevant": False}
 
-            schema = get_schema(sqlite_file = streamlit.session_state["uploaded_file"][cls.name])
+            schema = get_schema(
+                sqlite_file=streamlit.session_state["uploaded_file"][cls.name]
+            )
 
             prompt = ChatPromptTemplate.from_messages(
                 [
@@ -213,7 +221,9 @@ class DataQueryAssistantAgent(BaseAgent):
             if sql_query == "NOT_RELEVANT":
                 return {"sql_query": "NOT_RELEVANT", "sql_valid": False}
 
-            schema = get_schema(sqlite_file = streamlit.session_state["uploaded_file"][cls.name])
+            schema = get_schema(
+                sqlite_file=streamlit.session_state["uploaded_file"][cls.name]
+            )
 
             prompt = ChatPromptTemplate.from_messages(
                 [
@@ -298,7 +308,10 @@ class DataQueryAssistantAgent(BaseAgent):
                 return {"results": "NOT_RELEVANT"}
 
             try:
-                results = execute_query(sqlite_file = streamlit.session_state["uploaded_file"][cls.name], query=query)
+                results = execute_query(
+                    sqlite_file=streamlit.session_state["uploaded_file"][cls.name],
+                    query=query,
+                )
                 return {"results": results}
             except Exception as e:
                 return {"error": str(e)}
@@ -308,16 +321,15 @@ class DataQueryAssistantAgent(BaseAgent):
             question = state["question"]
             results = state["results"]
 
-            if results == "NOT_RELEVANT":
-                return {
-                    "answer": "Sorry, I can only give answers relevant to the database."
-                }
-
             prompt = ChatPromptTemplate.from_messages(
                 [
                     (
                         "system",
-                        "You are an AI assistant that formats database query results into a human-readable response. Give a conclusion to the user's question based on the query results. Do not give the answer in markdown format. Only give the answer in one line.",
+                        "You are an AI assistant that formats database query results into a human-readable response."
+                        "Give a conclusion to the user's question based on the query results."
+                        "Do not give the answer in markdown format."
+                        "Only give the answer in one line."
+                        "If the results are not relevant then say Sorry, I can only give answers relevant to the database.",
                     ),
                     (
                         "human",
@@ -331,16 +343,21 @@ class DataQueryAssistantAgent(BaseAgent):
             ).content
 
             final_response_prompt = """
-            Below are the given sql query, query results and final response
-            Present all these in a pretty manner to the user.
-        
-            sql query: {query}
-            query results: {results}
-            final response: {response}
+                If the response is not relevant then:
+                    Here is the message that user sent: {human_message}
+                    If the message is simply a greeting message then reply back with a greet else Simply say one liner: Sorry, I can only give answers relevant to the database. And then just exit.
+                Else:
+                    Below are the given sql query, query results and final response
+                    Present all these in a pretty manner to the user:
+                    
+                    sql query: {query}
+                    query results: {results}
+                    final response: {response}
             """
 
             final_response = llm.invoke(
                 final_response_prompt.format(
+                    human_message=state["messages"][-1],
                     query=state["sql_query"],
                     results=state["results"],
                     response=response,

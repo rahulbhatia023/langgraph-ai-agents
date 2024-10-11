@@ -1,3 +1,5 @@
+import tempfile
+
 import streamlit as st
 from langchain_core.messages import SystemMessage, HumanMessage
 from streamlit.commands.page_config import Layout, PageIcon
@@ -21,9 +23,9 @@ class BasePage:
     page_icon: PageIcon = "🤖"
     layout: Layout = "wide"
 
-    @classmethod
-    def pre_render(cls):
-        pass
+    show_file_uploader: bool = False
+    file_upload_label: str = "Upload a file"
+    file_upload_type: list[str] = ["csv"]
 
     @classmethod
     def stream_events(cls, agent_graph, human_message):
@@ -54,7 +56,7 @@ class BasePage:
                 agent_graph.update_state(
                     config=config,
                     values={"messages": [HumanMessage(content=human_message)]}
-                    | cls.agent.update_graph_state(human_message),
+                           | cls.agent.update_graph_state(human_message),
                     as_node=cls.agent.update_as_node,
                 )
 
@@ -63,9 +65,9 @@ class BasePage:
             )
 
             for event in agent_graph.stream(
-                input=agent_input,
-                config=config,
-                stream_mode="updates",
+                    input=agent_input,
+                    config=config,
+                    stream_mode="updates",
             ):
                 for k, v in event.items():
                     if cls.agent.nodes_to_display:
@@ -75,46 +77,44 @@ class BasePage:
                         display_message(agent_name=cls.agent.name, v=v)
 
     @classmethod
-    def render(cls):
-        if cls.required_keys and not keys_missing(cls.required_keys):
-            if "uploaded_file" not in st.session_state:
-                st.session_state.uploaded_file = {}
-            if cls.agent.name not in st.session_state.uploaded_file:
-                st.session_state.uploaded_file[cls.agent.name] = None
+    def pre_render(cls):
+        pass
 
+    @classmethod
+    def render(cls):
+        st.set_page_config(
+            page_title=cls.agent.name, page_icon=cls.page_icon, layout=cls.layout
+        )
+
+        st.markdown(
+            """
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+                .stApp {
+                    font-family: 'Poppins';
+                    background-color: #16423C;
+                }
+
+                .fontStyle {
+                    font-family: 'Poppins';
+                }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            f"<h2 class='fontStyle' style='color:#C4DAD2';>{cls.agent.name}</h2><br/>", unsafe_allow_html=True
+        )
+
+        if cls.required_keys and not keys_missing(cls.required_keys):
             if "graphs" not in st.session_state:
                 st.session_state.graphs = {}
             if cls.agent.name not in st.session_state.graphs:
                 st.session_state.graphs[cls.agent.name] = cls.agent.get_graph()
 
             agent_graph = st.session_state.graphs[cls.agent.name]
-
-            st.set_page_config(
-                page_title=cls.agent.name, page_icon=cls.page_icon, layout=cls.layout
-            )
-
-            st.markdown(
-                """
-                <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-
-                    .stApp {
-                        font-family: 'Poppins';
-                        background-color: #16423C;
-                    }
-
-                    .fontStyle {
-                        font-family: 'Poppins';
-                        color: #C4DAD2;
-                    }
-                </style>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            st.markdown(
-                f"<h2 class='fontStyle'>{cls.agent.name}</h2>", unsafe_allow_html=True
-            )
 
             with st.sidebar:
                 st.markdown(
@@ -139,6 +139,29 @@ class BasePage:
                     use_column_width="always",
                 )
 
+                if cls.show_file_uploader:
+                    if "uploaded_file" not in st.session_state:
+                        st.session_state.uploaded_file = {}
+                    if cls.agent.name not in st.session_state.uploaded_file:
+                        st.session_state.uploaded_file[cls.agent.name] = None
+
+                    st.markdown(
+                        "<br/><br/><h3 style='color:#E9EFEC;font-family: Poppins;text-align: center'>Upload SQLite DB file</h3>",
+                        unsafe_allow_html=True,
+                    )
+
+                    if uploaded_file := st.file_uploader(
+                            label=cls.file_upload_label,
+                            type=cls.file_upload_type,
+                            label_visibility="hidden",
+                    ):
+                        with tempfile.NamedTemporaryFile(delete=False) as file:
+                            file.write(uploaded_file.read())
+                            file.flush()
+                            st.session_state["uploaded_file"][
+                                cls.agent.name
+                            ] = file.name
+
             if "page_messages" not in st.session_state:
                 st.session_state.page_messages = {}
 
@@ -147,9 +170,13 @@ class BasePage:
 
             for message in st.session_state.page_messages[cls.agent.name]:
                 with st.chat_message(message["role"]):
-                    st.markdown(message["content"])
+                    st.markdown(f"<p class='fontStyle'>{message["content"]}</p>", unsafe_allow_html = True)
 
-            cls.stream_events(agent_graph=agent_graph, human_message=st.chat_input())
+            if human_message := st.chat_input():
+                if cls.show_file_uploader and not st.session_state.uploaded_file[cls.agent.name]:
+                    st.error("Please upload a file before sending a message.", icon="🚨")
+                else:
+                    cls.stream_events(agent_graph=agent_graph, human_message=human_message)
 
     @classmethod
     def post_render(cls):

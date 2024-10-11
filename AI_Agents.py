@@ -1,4 +1,9 @@
+import os
+
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def get_api_key(keys):
@@ -7,7 +12,7 @@ def get_api_key(keys):
             st.session_state[key_name] = ""
 
         api_key = st.text_input(
-            label=f"{key_name}", value=st.session_state[key_name], type=key_type
+            label=f"{key_name}", value=os.getenv(key_name), type=key_type
         )
 
         if api_key:
