@@ -19,11 +19,11 @@ class FinancialAssistantAgent(BaseAgent):
         Follow these steps:
         1. Identify the relevant financial data needed to answer the query.
         2. Use the available tools to retrieve the necessary data, such as stock financials, news, or aggregate data. 
-        3. Use web-search tool in the last if the query cannot be answered because of authorization restrictions or any other reason while using other tools.
+        3. Use web-search tool in the last if the query cannot be answered because of authorization restrictions or any other reason while using other tools. Always consider today's date while using the web-search tool.
         4. Formulate a concise response that directly addresses the user's question, focusing on the most important findings from your analysis.
 
         Remember:
-        - Today's date is {datetime.today().strftime("%Y %m %d")}.
+        - Today's date is {datetime.today().strftime("%d/%m/%Y")}.
         - Use general topic and include domains like "marketwatch.com" and "finance.yahoo.com" while using web-search tool.
 
         Your ultimate goal is to empower users with clear, actionable insights to navigate the financial landscape effectively.
