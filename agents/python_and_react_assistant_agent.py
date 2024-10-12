@@ -1,4 +1,5 @@
 import streamlit as st
+from e2b_code_interpreter import CodeInterpreter
 
 from common.agent import BaseAgent
 from tools.python_and_react_assistant.execute_python import ExecutePythonTool
@@ -10,6 +11,15 @@ from tools.python_and_react_assistant.send_file_to_user import SendFileToUserToo
 
 
 class PythonAndReactAssistantAgent(BaseAgent):
+    if (
+        "E2B_SANDBOX_ID" not in st.session_state
+        or not st.session_state["E2B_SANDBOX_ID"]
+    ):
+        with CodeInterpreter(api_key=st.session_state["E2B_API_KEY"]) as sandbox:
+            sandbox_id = sandbox.id
+            sandbox.keep_alive(300)
+            st.session_state["E2B_SANDBOX_ID"] = sandbox_id
+
     name = "Python and React Assistant"
 
     system_prompt = """
@@ -20,20 +30,20 @@ class PythonAndReactAssistantAgent(BaseAgent):
             - You also have access to the filesystem and can read/write files.
             - You can install any pip package when you need. But the usual packages for data analysis are already preinstalled. Use the `!pip install -q package_name` command to install a package.
             - You can run any python code you want, everything is running in a secure sandbox environment.
+            - Always display the code to the user while generating the final response
             - NEVER execute provided tools when you are asked to explain your code.
             - NEVER use `execute_python` tool when you are asked to create a react application. Use `render_react` tool instead.
             - Prioritize to use tailwindcss for styling your react components.
-            - Always display the code to the user while generating the final response
     """
 
     tools = [
         ExecutePythonTool(
-            e2b_sandbox_id=st.session_state.get("E2B_SANDBOX_ID", ""),
+            e2b_sandbox_id=st.session_state["E2B_SANDBOX_ID"],
             e2b_api_key=st.session_state["E2B_API_KEY"],
         ),
         render_react,
         SendFileToUserTool(
-            e2b_sandbox_id=st.session_state.get("E2B_SANDBOX_ID", ""),
+            e2b_sandbox_id=st.session_state["E2B_SANDBOX_ID"],
             e2b_api_key=st.session_state["E2B_API_KEY"],
         ),
         install_npm_dependencies,

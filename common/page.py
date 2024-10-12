@@ -56,7 +56,7 @@ class BasePage:
                 agent_graph.update_state(
                     config=config,
                     values={"messages": [HumanMessage(content=human_message)]}
-                           | cls.agent.update_graph_state(human_message),
+                    | cls.agent.update_graph_state(human_message),
                     as_node=cls.agent.update_as_node,
                 )
 
@@ -65,9 +65,9 @@ class BasePage:
             )
 
             for event in agent_graph.stream(
-                    input=agent_input,
-                    config=config,
-                    stream_mode="updates",
+                input=agent_input,
+                config=config,
+                stream_mode="updates",
             ):
                 for k, v in event.items():
                     if cls.agent.nodes_to_display:
@@ -105,7 +105,8 @@ class BasePage:
         )
 
         st.markdown(
-            f"<h2 class='fontStyle' style='color:#C4DAD2';>{cls.agent.name}</h2><br/>", unsafe_allow_html=True
+            f"<h2 class='fontStyle' style='color:#C4DAD2';>{cls.agent.name}</h2><br/>",
+            unsafe_allow_html=True,
         )
 
         if cls.required_keys and not keys_missing(cls.required_keys):
@@ -151,9 +152,9 @@ class BasePage:
                     )
 
                     if uploaded_file := st.file_uploader(
-                            label=cls.file_upload_label,
-                            type=cls.file_upload_type,
-                            label_visibility="hidden",
+                        label=cls.file_upload_label,
+                        type=cls.file_upload_type,
+                        label_visibility="hidden",
                     ):
                         with tempfile.NamedTemporaryFile(delete=False) as file:
                             file.write(uploaded_file.read())
@@ -170,13 +171,23 @@ class BasePage:
 
             for message in st.session_state.page_messages[cls.agent.name]:
                 with st.chat_message(message["role"]):
-                    st.markdown(f"<p class='fontStyle'>{message["content"]}</p>", unsafe_allow_html = True)
+                    st.markdown(
+                        f"<p class='fontStyle'>{message["content"]}</p>",
+                        unsafe_allow_html=True,
+                    )
 
             if human_message := st.chat_input():
-                if cls.show_file_uploader and not st.session_state.uploaded_file[cls.agent.name]:
-                    st.error("Please upload a file before sending a message.", icon="🚨")
+                if (
+                    cls.show_file_uploader
+                    and not st.session_state.uploaded_file[cls.agent.name]
+                ):
+                    st.error(
+                        "Please upload a file before sending a message.", icon="🚨"
+                    )
                 else:
-                    cls.stream_events(agent_graph=agent_graph, human_message=human_message)
+                    cls.stream_events(
+                        agent_graph=agent_graph, human_message=human_message
+                    )
 
     @classmethod
     def post_render(cls):
