@@ -21,17 +21,26 @@ class BaseAgent:
     base_url = "https://api.openai.com/v1"
 
     @classmethod
+    def get_tools(cls) -> Sequence[BaseTool]:
+        pass
+
+    @classmethod
     def update_graph_state(cls, human_message):
         pass
 
     @classmethod
     def get_graph(cls):
+        tools = cls.get_tools()
+
         llm = ChatOpenAI(
-            model=cls.model, api_key=st.session_state["OPENAI_API_KEY"], base_url=cls.base_url, temperature=0
+            model=cls.model,
+            api_key=st.session_state["OPENAI_API_KEY"],
+            base_url=cls.base_url,
+            temperature=0,
         )
 
-        if cls.tools:
-            llm = llm.bind_tools(tools=cls.tools)
+        if tools:
+            llm = llm.bind_tools(tools=tools)
 
         def call_llm(state):
             messages = state["messages"]
@@ -41,7 +50,7 @@ class BaseAgent:
         graph = StateGraph(MessagesState)
 
         graph.add_node("agent", call_llm)
-        graph.add_node("tools", ToolNode(cls.tools))
+        graph.add_node("tools", ToolNode(tools=tools))
 
         graph.add_edge(START, "agent")
         graph.add_conditional_edges(

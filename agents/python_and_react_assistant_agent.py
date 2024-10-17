@@ -1,5 +1,5 @@
 import streamlit as st
-from e2b_code_interpreter import CodeInterpreter
+from e2b_code_interpreter import Sandbox
 
 from common.agent import BaseAgent
 from tools.python_and_react_assistant.execute_python import ExecutePythonTool
@@ -11,15 +11,6 @@ from tools.python_and_react_assistant.send_file_to_user import SendFileToUserToo
 
 
 class PythonAndReactAssistantAgent(BaseAgent):
-    if (
-        "E2B_SANDBOX_ID" not in st.session_state
-        or not st.session_state["E2B_SANDBOX_ID"]
-    ):
-        with CodeInterpreter(api_key=st.session_state["E2B_API_KEY"]) as sandbox:
-            sandbox_id = sandbox.id
-            sandbox.keep_alive(300)
-            st.session_state["E2B_SANDBOX_ID"] = sandbox_id
-
     name = "Python and React Assistant"
 
     system_prompt = """
@@ -36,15 +27,28 @@ class PythonAndReactAssistantAgent(BaseAgent):
             - Prioritize to use tailwindcss for styling your react components.
     """
 
-    tools = [
-        ExecutePythonTool(
-            e2b_sandbox_id=st.session_state["E2B_SANDBOX_ID"],
-            e2b_api_key=st.session_state["E2B_API_KEY"],
-        ),
-        render_react,
-        SendFileToUserTool(
-            e2b_sandbox_id=st.session_state["E2B_SANDBOX_ID"],
-            e2b_api_key=st.session_state["E2B_API_KEY"],
-        ),
-        install_npm_dependencies,
-    ]
+    @classmethod
+    def get_tools(cls):
+        print("inside get_tools")
+        if (
+            "E2B_SANDBOX_ID" not in st.session_state
+            or not st.session_state["E2B_SANDBOX_ID"]
+        ):
+            with Sandbox(api_key=st.session_state["E2B_API_KEY"]) as sandbox:
+                sandbox_id = sandbox.id
+                print("sandbox_id", sandbox_id)
+                sandbox.keep_alive(300)
+                st.session_state["E2B_SANDBOX_ID"] = sandbox_id
+
+        return [
+            ExecutePythonTool(
+                e2b_sandbox_id=st.session_state["E2B_SANDBOX_ID"],
+                e2b_api_key=st.session_state["E2B_API_KEY"],
+            ),
+            render_react,
+            SendFileToUserTool(
+                e2b_sandbox_id=st.session_state["E2B_SANDBOX_ID"],
+                e2b_api_key=st.session_state["E2B_API_KEY"],
+            ),
+            install_npm_dependencies,
+        ]

@@ -51,7 +51,10 @@ class DataQueryAssistantAgent(BaseAgent):
     @classmethod
     def get_graph(cls):
         llm = ChatOpenAI(
-            model=cls.model, api_key=streamlit.session_state["OPENAI_API_KEY"], base_url=cls.base_url, temperature=0
+            model=cls.model,
+            api_key=streamlit.session_state["OPENAI_API_KEY"],
+            base_url=cls.base_url,
+            temperature=0,
         )
 
         def invoke_llm(state):

@@ -29,14 +29,20 @@ class FinancialAssistantAgent(BaseAgent):
         Your ultimate goal is to empower users with clear, actionable insights to navigate the financial landscape effectively.
     """
 
-    tools = [
-        LastQuoteTool(polygon_api_key=st.session_state["POLYGON_API_KEY"]),
-        PricesTool(
-            financial_datasets_api_key=st.session_state["FINANCIAL_DATASETS_API_KEY"]
-        ),
-        TickerNewsTool(polygon_api_key=st.session_state["POLYGON_API_KEY"]),
-        SearchLineItemsTool(
-            financial_datasets_api_key=st.session_state["FINANCIAL_DATASETS_API_KEY"]
-        ),
-        WebSearchTool(tavily_api_key=st.session_state["TAVILY_API_KEY"]),
-    ]
+    @classmethod
+    def get_tools(cls):
+        return [
+            LastQuoteTool(polygon_api_key=st.session_state["POLYGON_API_KEY"]),
+            PricesTool(
+                financial_datasets_api_key=st.session_state[
+                    "FINANCIAL_DATASETS_API_KEY"
+                ]
+            ),
+            TickerNewsTool(polygon_api_key=st.session_state["POLYGON_API_KEY"]),
+            SearchLineItemsTool(
+                financial_datasets_api_key=st.session_state[
+                    "FINANCIAL_DATASETS_API_KEY"
+                ]
+            ),
+            WebSearchTool(tavily_api_key=st.session_state["TAVILY_API_KEY"]),
+        ]

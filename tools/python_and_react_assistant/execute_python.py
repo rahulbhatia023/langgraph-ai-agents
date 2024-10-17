@@ -1,6 +1,7 @@
 import base64
 from typing import Union, Dict
 
+from e2b_code_interpreter import Sandbox
 from e2b_code_interpreter import CodeInterpreter
 from langchain_core.tools import BaseTool
 from pydantic import Field
@@ -16,7 +17,12 @@ class ExecutePythonTool(BaseTool):
     )
 
     def _run(self, code: str) -> Union[Dict, str]:
-        with CodeInterpreter.reconnect(
+        print("inside ExecutePythonTool")
+        print(f"Executing code: {code}")
+        print(f"Using sandbox ID: {self.e2b_sandbox_id}")
+        print(f"Using API key: {self.e2b_api_key}")
+
+        with Sandbox(api_key=self.e2b_api_key).reconnect(
             sandbox_id=self.e2b_sandbox_id, api_key=self.e2b_api_key
         ) as sandbox:
             execution = sandbox.notebook.exec_cell(code)

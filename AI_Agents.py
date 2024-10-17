@@ -6,11 +6,9 @@ def get_api_key(keys):
         if key_name not in st.session_state:
             st.session_state[key_name] = ""
 
-        api_key = st.text_input(
+        if api_key := st.text_input(
             label=f"{key_name}", value=st.session_state[key_name], type=key_type
-        )
-
-        if api_key:
+        ):
             st.session_state[key_name] = api_key
 
 

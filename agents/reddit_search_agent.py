@@ -16,10 +16,12 @@ class RedditSearchAgent(BaseAgent):
         Once you are provided with the information from the tool, summarize the contaxt and provide the best useful answer.
     """
 
-    tools = [
-        RedditSearchTool(
-            reddit_client_id=streamlit.session_state["REDDIT_CLIENT_ID"],
-            reddit_client_secret=streamlit.session_state["REDDIT_CLIENT_SECRET"],
-            reddit_user_agent=streamlit.session_state["REDDIT_USER_AGENT"],
-        )
-    ]
+    @classmethod
+    def get_tools(cls):
+        return [
+            RedditSearchTool(
+                reddit_client_id=streamlit.session_state["REDDIT_CLIENT_ID"],
+                reddit_client_secret=streamlit.session_state["REDDIT_CLIENT_SECRET"],
+                reddit_user_agent=streamlit.session_state["REDDIT_USER_AGENT"],
+            )
+        ]

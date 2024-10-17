@@ -1,7 +1,7 @@
 import os
 from typing import Union, Dict, Annotated, Optional
 
-from e2b_code_interpreter import CodeInterpreter
+from e2b_code_interpreter import Sandbox
 from langchain_core.tools import BaseTool
 from langchain_core.utils.pydantic import TypeBaseModel
 from pydantic import BaseModel, Field, SkipValidation
@@ -21,8 +21,8 @@ class SendFileToUserTool(BaseTool):
     return_direct: bool = True
 
     def _run(self, filepath: str) -> Union[Dict, str]:
-        with CodeInterpreter.reconnect(
-            sandbox_id=self.e2b_sandbox_id, api_key=self.e2b_api_key
+        with Sandbox(api_key=self.e2b_api_key).reconnect(
+            sandbox_id=self.e2b_sandbox_id
         ) as sandbox:
             remote_file_path = "/home/user/" + filepath
             try:
