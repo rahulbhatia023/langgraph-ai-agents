@@ -18,7 +18,6 @@ class BaseAgent:
     tools: Sequence[BaseTool] = []
 
     model = "gpt-4o"
-    api_key = st.session_state["OPENAI_API_KEY"]
     base_url = "https://api.openai.com/v1"
 
     @classmethod
@@ -28,7 +27,7 @@ class BaseAgent:
     @classmethod
     def get_graph(cls):
         llm = ChatOpenAI(
-            model=cls.model, api_key=cls.api_key, base_url=cls.base_url, temperature=0
+            model=cls.model, api_key=st.session_state["OPENAI_API_KEY"], base_url=cls.base_url, temperature=0
         )
 
         if cls.tools:
