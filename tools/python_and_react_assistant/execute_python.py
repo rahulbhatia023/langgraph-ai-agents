@@ -2,13 +2,11 @@ import base64
 from typing import Union, Dict
 
 from e2b_code_interpreter import Sandbox
-from e2b_code_interpreter import CodeInterpreter
 from langchain_core.tools import BaseTool
 from pydantic import Field
 
 
 class ExecutePythonTool(BaseTool):
-    e2b_sandbox_id: str = Field(..., description="The sandbox ID to use.")
     e2b_api_key: str = Field(..., description="The E2B API key to use.")
 
     name: str = "execute-python"
@@ -17,20 +15,10 @@ class ExecutePythonTool(BaseTool):
     )
 
     def _run(self, code: str) -> Union[Dict, str]:
-        print("inside ExecutePythonTool")
-        print(f"Executing code: {code}")
-        print(f"Using sandbox ID: {self.e2b_sandbox_id}")
-        print(f"Using API key: {self.e2b_api_key}")
-
-        with Sandbox(api_key=self.e2b_api_key).reconnect(
-            sandbox_id=self.e2b_sandbox_id, api_key=self.e2b_api_key
-        ) as sandbox:
-            execution = sandbox.notebook.exec_cell(code)
+        with Sandbox(api_key=self.e2b_api_key) as sandbox:
+            execution = sandbox.run_code(code)
 
             if execution.error:
-                print(
-                    f"There was an error during execution: {execution.error.name}: {execution.error.value}.\n"
-                )
                 return (
                     f"There was an error during execution: {execution.error.name}: {execution.error.value}.\n"
                     f"{execution.error.traceback}"
@@ -52,7 +40,6 @@ class ExecutePythonTool(BaseTool):
                     filename = f"chart.png"
                     with open(filename, "wb") as f:
                         f.write(png_data)
-                    print(f"Saved chart to {filename}")
 
         if execution.logs.stdout or execution.logs.stderr:
             message += "These are the logs of the execution:\n"
