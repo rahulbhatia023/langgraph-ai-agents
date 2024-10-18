@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
-import 'tailwindcss/tailwind.css';
+import './App.css';
 
-const Square = ({ value, onClick }) => {
+function Square({ value, onClick }) {
   return (
-    <button 
-      className="w-16 h-16 bg-white border border-gray-400 text-2xl font-bold focus:outline-none"
-      onClick={onClick}
-    >
+    <button className="w-16 h-16 bg-blue-200 text-2xl font-bold" onClick={onClick}>
       {value}
     </button>
   );
-};
+}
 
-const Board = () => {
+function Board() {
   const [squares, setSquares] = useState(Array(9).fill(null));
   const [xIsNext, setXIsNext] = useState(true);
 
@@ -54,9 +51,9 @@ const Board = () => {
       </div>
     </div>
   );
-};
+}
 
-const calculateWinner = (squares) => {
+function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -74,14 +71,14 @@ const calculateWinner = (squares) => {
     }
   }
   return null;
-};
+}
 
-const TicTacToe = () => {
+function App() {
   return (
-    <div className="h-screen flex justify-center items-center bg-gray-100">
+    <div className="flex justify-center items-center h-screen bg-gray-100">
       <Board />
     </div>
   );
-};
+}
 
-export default TicTacToe;
+export default App;

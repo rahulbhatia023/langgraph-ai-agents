@@ -29,8 +29,10 @@ Output Format:
 import operator
 from typing import List, Annotated
 
+import streamlit
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.tools import TavilySearchResults
+from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 from langchain_core.messages import (
     SystemMessage,
     HumanMessage,
@@ -309,8 +311,14 @@ class ResearchAnalystAgent(BaseAgent):
 
     @classmethod
     def get_graph(cls):
+        openai_api_key = streamlit.session_state["OPENAI_API_KEY"]
+        tavily_api_key = streamlit.session_state["TAVILY_API_KEY"]
+
         llm = ChatOpenAI(
-            model=cls.model, api_key=cls.api_key, base_url=cls.base_url, temperature=0
+            model=cls.model,
+            api_key=openai_api_key,
+            base_url=cls.base_url,
+            temperature=0,
         )
 
         graph = StateGraph(ResearchGraphState)
@@ -398,7 +406,10 @@ class ResearchAnalystAgent(BaseAgent):
             )
 
             # Search
-            tavily_search = TavilySearchResults(max_results=3)
+            tavily_search = TavilySearchResults(
+                max_results=3,
+                api_wrapper=TavilySearchAPIWrapper(tavily_api_key=tavily_api_key),
+            )
             search_docs = tavily_search.invoke(search_query.search_query)
 
             # Format

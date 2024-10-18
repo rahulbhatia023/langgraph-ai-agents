@@ -26,7 +26,7 @@ class BaseAgent:
 
     @classmethod
     def update_graph_state(cls, human_message):
-        pass
+        return {}
 
     @classmethod
     def get_graph(cls):
