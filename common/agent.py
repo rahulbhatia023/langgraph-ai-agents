@@ -11,7 +11,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 
 class BaseAgent:
     name: str = None
-    system_prompt: str = None
+    system_prompt: str = "You are a useful AI assistant."
     interrupt_before: list[str] = []
     update_as_node: str = None
     nodes_to_display = []
@@ -22,7 +22,7 @@ class BaseAgent:
 
     @classmethod
     def get_tools(cls) -> Sequence[BaseTool]:
-        pass
+        return []
 
     @classmethod
     def update_graph_state(cls, human_message):

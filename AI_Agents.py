@@ -140,6 +140,17 @@ with col12:
 with col13:
     st.markdown(
         custom_card(
+            title="Podcast Generator",
+            description=[],
+        ),
+        unsafe_allow_html=True,
+    )
+
+col21, col22, col23 = container.columns(3)
+
+with col21:
+    st.markdown(
+        custom_card(
             title="Python and React Assistant",
             description=[
                 "AI-powered assistant with Python execution capabilities",
@@ -152,9 +163,7 @@ with col13:
         unsafe_allow_html=True,
     )
 
-col21, col22, _ = container.columns(3)
-
-with col21:
+with col22:
     st.markdown(
         custom_card(
             title="Reddit Search",
@@ -169,7 +178,7 @@ with col21:
         unsafe_allow_html=True,
     )
 
-with col22:
+with col23:
     st.markdown(
         custom_card(
             title="Research Analyst",
