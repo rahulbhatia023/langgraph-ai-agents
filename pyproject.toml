@@ -18,6 +18,7 @@ watchdog = "^5.0.3"
 praw = "^7.7.1"
 langchain-community = "^0.3.2"
 wikipedia = "^1.4.0"
+google-generativeai = "^0.8.3"
 
 
 [build-system]
