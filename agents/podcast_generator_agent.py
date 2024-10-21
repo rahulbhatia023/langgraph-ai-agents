@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from common.agent import BaseAgent
 
 
-class Planning(MessagesState):
+class Planning(TypedDict):
     topic: str
     keywords: list[str]
     subtopics: list[str]
@@ -42,14 +42,6 @@ class Structure(BaseModel):
 class PodcastGeneratorAgent(BaseAgent):
     name = "Podcast Generator"
 
-    interrupt_before = ["ask_question"]
-
-    update_as_node = "ask_question"
-
-    @classmethod
-    def update_graph_state(cls, human_message):
-        return {"topic": human_message}
-
     @classmethod
     def get_graph(cls):
         def get_model(temp: float = 0.1, max_tokens: int = 100):
@@ -59,13 +51,6 @@ class PodcastGeneratorAgent(BaseAgent):
                 temperature=temp,
                 max_tokens=max_tokens,
             )
-
-        def invoke_llm(state):
-            response = get_model().invoke(state["messages"])
-            return {"messages": [response]}
-
-        def ask_question(state):
-            pass
 
         def get_keywords(state: Planning):
             topic = state["topic"]
@@ -80,7 +65,7 @@ class PodcastGeneratorAgent(BaseAgent):
                 .with_structured_output(Keywords)
                 .invoke(messages)
             )
-            return {"keywords": message.keys, "messages": [AIMessage(content=message.keys)]}
+            return {"keywords": message.keys}
 
         def get_structure(state: Planning):
             topic = state["topic"]
@@ -98,21 +83,15 @@ class PodcastGeneratorAgent(BaseAgent):
                 .with_structured_output(Structure)
                 .invoke(messages)
             )
-            return {"subtopics": message.subtopics[0].subtopics, "messages": [AIMessage(content=message.subtopics[0].subtopics)]}
+            return {"subtopics": message.subtopics[0].subtopics}
 
-        graph = StateGraph(Planning)
+        planning_graph = StateGraph(Planning)
 
-        graph.add_node("agent", invoke_llm)
-        graph.add_node("ask_question", ask_question)
-        graph.add_node("get_keywords", get_keywords)
-        graph.add_node("get_structure", get_structure)
+        planning_graph.add_node("get_keywords", get_keywords)
+        planning_graph.add_node("get_structure", get_structure)
 
-        graph.add_edge(START, "agent")
-        graph.add_edge("agent", "ask_question")
-        graph.add_edge("ask_question", "get_keywords")
-        graph.add_edge("get_keywords", "get_structure")
-        graph.add_edge("get_structure", END)
+        planning_graph.add_edge(START, "get_keywords")
+        planning_graph.add_edge("get_keywords", "get_structure")
+        planning_graph.add_edge("get_structure", END)
 
-        return graph.compile(
-            interrupt_before=cls.interrupt_before, checkpointer=MemorySaver()
-        )
+        return planning_graph.compile()
