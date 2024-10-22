@@ -1,4 +1,9 @@
+import os
+
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def get_api_key(keys):
@@ -7,7 +12,7 @@ def get_api_key(keys):
             st.session_state[key_name] = ""
 
         if api_key := st.text_input(
-            label=f"{key_name}", value=st.session_state[key_name], type=key_type
+            label=f"{key_name}", value=os.getenv(key_name), type=key_type
         ):
             st.session_state[key_name] = api_key
 
@@ -90,6 +95,7 @@ with st.sidebar:
     get_api_key(
         {
             "OPENAI_API_KEY": "password",
+            "GOOGLE_API_KEY": "password",
             "E2B_API_KEY": "password",
             "FINANCIAL_DATASETS_API_KEY": "password",
             "POLYGON_API_KEY": "password",
