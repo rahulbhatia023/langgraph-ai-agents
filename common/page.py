@@ -136,7 +136,7 @@ class BasePage:
                 )
 
                 st.image(
-                    agent_graph.get_graph().draw_mermaid_png(),
+                    agent_graph.get_graph(xray=1).draw_mermaid_png(),
                     use_column_width="always",
                 )
 

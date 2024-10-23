@@ -1,6 +1,7 @@
 import operator
-from typing import TypedDict, Annotated, List
+from typing import Annotated, List
 
+import google.generativeai as genai
 import streamlit as st
 from langchain_core.messages import (
     SystemMessage,
@@ -13,55 +14,28 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph, MessagesState
 from langgraph.types import Send
-from pydantic import BaseModel, Field
 
 from common.agent import BaseAgent
 from common.tools import wikipedia_search, tavily_search
-import google.generativeai as genai
 
 
-class Planning(TypedDict):
+class Planning(MessagesState):
     topic: str
     keywords: list[str]
     subtopics: list[str]
 
 
-class Keywords(BaseModel):
-    """Answer with at least 5 keywords that you think are related to the topic"""
-
-    keys: list = Field(description="list of at least 5 keywords related to the topic")
-
-
-class Subtopics(BaseModel):
-    """Answer with at least 5 subtopics related to the topic"""
-
-    subtopics: list = Field(
-        description="list of at least 5 subtopics related to the topic"
-    )
-
-
-class Structure(BaseModel):
-    """Structure of the podcast having in account the topic and the keywords"""
-
-    subtopics: list[Subtopics] = Field(
-        description="5 subtopics that we will review in the podcast related to the Topic and the Keywords"
-    )
-
-
 class InterviewState(MessagesState):
     topic: str  # Topic of the podcast
+    subtopic: str
     max_num_turns: int  # Number turns of conversation
     context: Annotated[list, operator.add]  # Source docs
     section: str  # section transcript
     sections: list  # Final key we duplicate in outer state for Send() API
 
 
-class SearchQuery(BaseModel):
-    search_query: str = Field(None, description="Search query for retrieval.")
-
-
 class ResearchGraphState(MessagesState):
-    topic: Annotated[str, operator.add]  # Research topic
+    topic: str  # Research topic
     keywords: List  # Keywords
     max_analysts: int  # Number of analysts
     subtopics: List  # Subtopics
@@ -186,11 +160,17 @@ Here are the segments to draw upon for crafting your conclusion: {formatted_str_
 class PodcastGeneratorAgent(BaseAgent):
     name = "Podcast Generator"
 
+    system_prompt = """You are an intelligent AI agent specialised in writing the script for a podcast for a specific topic.
+    Just greet the user with a Hi and ask for the topic and then proceed accordingly. Please do not include any further details and preamble."""
+
     interrupt_before = ["ask_topic"]
 
     update_as_node = "ask_topic"
 
     nodes_to_display = ["agent", "final_report"]
+
+    model = "llama3.2"
+    base_url = "http://localhost:11434/v1"
 
     @classmethod
     def update_graph_state(cls, human_message):
@@ -201,9 +181,10 @@ class PodcastGeneratorAgent(BaseAgent):
         def get_model(temp: float = 0.1, max_tokens: int = 100):
             return ChatOpenAI(
                 model=cls.model,
-                api_key=st.session_state["OPENAI_API_KEY"],
+                api_key="ollama",
                 temperature=temp,
                 max_tokens=max_tokens,
+                base_url=cls.base_url,
             )
 
         def invoke_llm(state):
@@ -214,37 +195,33 @@ class PodcastGeneratorAgent(BaseAgent):
             pass
 
         def get_keywords(state: Planning):
-            topic = state["topic"]
-            messages = [
-                SystemMessage(
-                    content="Your task is to generate 5 relevant words about the following topic: "
-                    + topic
+            return {
+                "keywords": get_model()
+                .invoke(
+                    [
+                        SystemMessage(
+                            content=f"Your task is to generate 5 comma separated relevant words about the following topic: {state["topic"]}"
+                        )
+                    ]
+                    + state["messages"]
                 )
-            ]
-            message = (
-                get_model(temp=0.1, max_tokens=50)
-                .with_structured_output(Keywords)
-                .invoke(messages)
-            )
-            return {"keywords": message.keys}
+                .content.split(",")
+            }
 
         def get_structure(state: Planning):
-            topic = state["topic"]
-            keywords = state["keywords"]
-            messages = [
-                SystemMessage(
-                    content="You task is to generate 5 subtopics to make a podcast about the following topic: "
-                    + topic
-                    + "and the following keywords:"
-                    + " ".join(keywords)
+            return {
+                "subtopics": get_model()
+                .invoke(
+                    [
+                        SystemMessage(
+                            content=f"""You task is to generate 5 comma separated subtopics to make a podcast about the following topic: {state["topic"]}, and the following keywords: {",".join(state["keywords"])}.
+                            Do not include any preamble in your response, just provide the comma separated subtopics."""
+                        )
+                    ]
+                    + state["messages"]
                 )
-            ]
-            message = (
-                get_model(temp=0.3, max_tokens=1000)
-                .with_structured_output(Structure)
-                .invoke(messages)
-            )
-            return {"subtopics": message.subtopics[0].subtopics}
+                .content.split(",")
+            }
 
         planning_builder = StateGraph(Planning)
 
@@ -255,15 +232,11 @@ class PodcastGeneratorAgent(BaseAgent):
         planning_builder.add_edge("get_keywords", "get_structure")
         planning_builder.add_edge("get_structure", END)
 
-        podcast_gpt = get_model(max_tokens=1000)
-        structured_llm = podcast_gpt.with_structured_output(SearchQuery)
-
         def generate_question(state: InterviewState):
             """Node to generate a question"""
-
             return {
                 "messages": [
-                    podcast_gpt.invoke(
+                    get_model(max_tokens=1000).invoke(
                         [
                             SystemMessage(
                                 content=question_instructions.format(
@@ -277,31 +250,29 @@ class PodcastGeneratorAgent(BaseAgent):
             }
 
         def search_web(state: InterviewState):
-            return {
-                "context": [
-                    tavily_search(
-                        query=structured_llm.invoke(
-                            [SystemMessage(content=search_instructions)]
-                            + state["messages"]
-                        ).search_query
-                    )
-                ]
-            }
+            response = get_model(max_tokens=1000).invoke(
+                [SystemMessage(content=search_instructions)] + state["messages"]
+            )
+            print(f"##### subtopic: {state["subtopic"]} response ##### ==> {response}")
+
+            return {"context": [tavily_search(query=response.content)]}
 
         def search_wikipedia(state: InterviewState):
             return {
                 "context": [
                     wikipedia_search(
-                        query=structured_llm.invoke(
+                        query=get_model(max_tokens=1000)
+                        .invoke(
                             [SystemMessage(content=search_instructions)]
                             + state["messages"]
-                        ).search_query
+                        )
+                        .content
                     )
                 ]
             }
 
         def generate_answer(state: InterviewState):
-            answer = podcast_gpt.invoke(
+            answer = get_model(max_tokens=1000).invoke(
                 [
                     SystemMessage(
                         content=answer_instructions.format(
@@ -388,6 +359,7 @@ class PodcastGeneratorAgent(BaseAgent):
                     "Create podcast",
                     {
                         "topic": state["topic"],
+                        "subtopic": subtopic,
                         "messages": [
                             HumanMessage(
                                 content=f"So you said you were researching about {subtopic}?"
@@ -447,16 +419,11 @@ class PodcastGeneratorAgent(BaseAgent):
                 "messages": [AIMessage(content=final_report)],
             }
 
-        def Start_parallel(state):
-            """No-op node that should be interrupted on"""
-            pass
-
         builder = StateGraph(ResearchGraphState)
 
         builder.add_node("agent", invoke_llm)
         builder.add_node("ask_topic", ask_topic)
         builder.add_node("Planning", planning_builder.compile())
-        builder.add_node("Start research", Start_parallel)
         builder.add_node("Create podcast", interview_builder.compile())
         builder.add_node("Write report", write_report)
         builder.add_node("Write introduction", write_introduction)
@@ -466,9 +433,8 @@ class PodcastGeneratorAgent(BaseAgent):
         builder.add_edge(START, "agent")
         builder.add_edge("agent", "ask_topic")
         builder.add_edge("ask_topic", "Planning")
-        builder.add_edge("Planning", "Start research")
         builder.add_conditional_edges(
-            "Start research", initiate_all_interviews, ["Planning", "Create podcast"]
+            "Planning", initiate_all_interviews, path_map=["Create podcast"]
         )
         builder.add_edge("Create podcast", "Write report")
         builder.add_edge("Create podcast", "Write introduction")

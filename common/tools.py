@@ -4,7 +4,6 @@ from langchain_community.tools import TavilySearchResults
 
 def tavily_search(query, max_results=3):
     """Retrieve docs from web search"""
-
     return {
         "context": [
             "\n\n---\n\n".join(
@@ -21,7 +20,6 @@ def tavily_search(query, max_results=3):
 
 def wikipedia_search(query, load_max_docs=2):
     """Retrieve docs from wikipedia"""
-
     return {
         "context": [
             "\n\n---\n\n".join(
