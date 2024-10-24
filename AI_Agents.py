@@ -3,8 +3,6 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-load_dotenv()
-
 
 def get_api_key(keys):
     for key_name, key_type in keys.items():
@@ -12,7 +10,7 @@ def get_api_key(keys):
             st.session_state[key_name] = ""
 
         if api_key := st.text_input(
-            label=f"{key_name}", value=os.getenv(key_name), type=key_type
+            label=f"{key_name}", value=st.session_state[key_name], type=key_type
         ):
             st.session_state[key_name] = api_key
 
@@ -146,8 +144,14 @@ with col12:
 with col13:
     st.markdown(
         custom_card(
-            title="Podcast Generator",
-            description=[],
+            title="Podcast Script Writer",
+            description=[
+                "Generates content for podcasts based on provided topics",
+                "Produces a complete podcast purely based on the given topic",
+                "Uses extensive web-based tool searches to augment information for the topic",
+                "Reduces workload for podcast creators by providing structured and relevant content",
+                "Combines advanced AI models and graph-based workflows",
+            ],
         ),
         unsafe_allow_html=True,
     )

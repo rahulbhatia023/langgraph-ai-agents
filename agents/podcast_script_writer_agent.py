@@ -2,6 +2,7 @@ import operator
 from typing import Annotated, List
 
 import google.generativeai as genai
+import streamlit
 import streamlit as st
 from langchain_core.messages import (
     SystemMessage,
@@ -35,7 +36,7 @@ class InterviewState(MessagesState):
 
 
 class ResearchGraphState(MessagesState):
-    topic: str  # Research topic
+    topic: Annotated[str, operator.add]  # Research topic
     keywords: List  # Keywords
     max_analysts: int  # Number of analysts
     subtopics: List  # Subtopics
@@ -54,7 +55,7 @@ Your goal is boil down to interesting and specific insights related to your topi
 
 2. Specific: Insights that avoid generalities and include specific examples from the expert.
 
-Here is your topic of focus and set of goals: {topic}
+Here is your topic of focus and set of goals: {subtopic} in regards with: {topic}
 
 Begin by introducing the topic that fits your goals, and then ask your question.
 
@@ -66,13 +67,13 @@ Remember to stay in character throughout your response"""
 
 search_instructions = """You will be given a conversation between a host of a popular podcast and an expert.
 
-Your goal is to generate a well-structured query for use in retrieval and / or web-search related to the conversation.
-
 First, analyze the full conversation.
 
-Pay particular attention to the final question posed by the analyst.
+Pay particular attention to the final question posed by the host.
 
-Convert this final question into a well-structured web search query"""
+Convert this final question into an independent query to be used later for the web search. 
+
+Do not include any preambles or the conversation in the generated query."""
 
 answer_instructions = """You are an expert being interviewed by a popular podcast host.
 
@@ -157,8 +158,8 @@ Use ## Conclusion as the section header for your conclusion.
 Here are the segments to draw upon for crafting your conclusion: {formatted_str_sections}"""
 
 
-class PodcastGeneratorAgent(BaseAgent):
-    name = "Podcast Generator"
+class PodcastScriptWriterAgent(BaseAgent):
+    name = "Podcast Script Writer"
 
     system_prompt = """You are an intelligent AI agent specialised in writing the script for a podcast for a specific topic.
     Just greet the user with a Hi and ask for the topic and then proceed accordingly. Please do not include any further details and preamble."""
@@ -167,10 +168,7 @@ class PodcastGeneratorAgent(BaseAgent):
 
     update_as_node = "ask_topic"
 
-    nodes_to_display = ["agent", "final_report"]
-
-    model = "llama3.2"
-    base_url = "http://localhost:11434/v1"
+    nodes_to_display = ["agent", "Finalize podcast"]
 
     @classmethod
     def update_graph_state(cls, human_message):
@@ -178,10 +176,12 @@ class PodcastGeneratorAgent(BaseAgent):
 
     @classmethod
     def get_graph(cls):
+        openai_api_key = streamlit.session_state["OPENAI_API_KEY"]
+
         def get_model(temp: float = 0.1, max_tokens: int = 100):
             return ChatOpenAI(
                 model=cls.model,
-                api_key="ollama",
+                api_key=openai_api_key,
                 temperature=temp,
                 max_tokens=max_tokens,
                 base_url=cls.base_url,
@@ -240,7 +240,7 @@ class PodcastGeneratorAgent(BaseAgent):
                         [
                             SystemMessage(
                                 content=question_instructions.format(
-                                    topic=state["topic"]
+                                    topic=state["topic"], subtopic=state["subtopic"]
                                 )
                             )
                         ]
@@ -250,12 +250,18 @@ class PodcastGeneratorAgent(BaseAgent):
             }
 
         def search_web(state: InterviewState):
-            response = get_model(max_tokens=1000).invoke(
-                [SystemMessage(content=search_instructions)] + state["messages"]
-            )
-            print(f"##### subtopic: {state["subtopic"]} response ##### ==> {response}")
-
-            return {"context": [tavily_search(query=response.content)]}
+            return {
+                "context": [
+                    tavily_search(
+                        query=get_model(max_tokens=1000)
+                        .invoke(
+                            [SystemMessage(content=search_instructions)]
+                            + [state["messages"][-1]]
+                        )
+                        .content
+                    )
+                ]
+            }
 
         def search_wikipedia(state: InterviewState):
             return {
