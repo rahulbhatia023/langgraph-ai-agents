@@ -147,7 +147,6 @@ with col13:
             title="Podcast Script Writer",
             description=[
                 "Generates content for podcasts based on provided topics",
-                "Produces a complete podcast purely based on the given topic",
                 "Uses extensive web-based tool searches to augment information for the topic",
                 "Reduces workload for podcast creators by providing structured and relevant content",
                 "Combines advanced AI models and graph-based workflows",

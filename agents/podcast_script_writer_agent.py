@@ -177,6 +177,7 @@ class PodcastScriptWriterAgent(BaseAgent):
     @classmethod
     def get_graph(cls):
         openai_api_key = streamlit.session_state["OPENAI_API_KEY"]
+        tavily_api_key = streamlit.session_state["TAVILY_API_KEY"]
 
         def get_model(temp: float = 0.1, max_tokens: int = 100):
             return ChatOpenAI(
@@ -258,7 +259,8 @@ class PodcastScriptWriterAgent(BaseAgent):
                             [SystemMessage(content=search_instructions)]
                             + [state["messages"][-1]]
                         )
-                        .content
+                        .content,
+                        tavily_api_key=tavily_api_key,
                     )
                 ]
             }

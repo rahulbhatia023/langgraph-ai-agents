@@ -1,17 +1,21 @@
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.tools import TavilySearchResults
+from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 
 
-def tavily_search(query, max_results=3):
+def tavily_search(query, tavily_api_key, max_results=3):
     """Retrieve docs from web search"""
     return {
         "context": [
             "\n\n---\n\n".join(
                 [
                     f'<Document href="{doc["url"]}"/>\n{doc["content"]}\n</Document>'
-                    for doc in TavilySearchResults(max_results=max_results).invoke(
-                        query
-                    )
+                    for doc in TavilySearchResults(
+                        max_results=max_results,
+                        api_wrapper=TavilySearchAPIWrapper(
+                            tavily_api_key=tavily_api_key
+                        ),
+                    ).invoke(query)
                 ]
             )
         ]
