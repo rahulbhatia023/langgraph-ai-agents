@@ -1,7 +1,4 @@
-import os
-
 import streamlit as st
-from dotenv import load_dotenv
 
 
 def get_api_key(keys):
