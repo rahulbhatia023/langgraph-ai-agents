@@ -24,7 +24,11 @@ class SimpleRAGAgent(BaseAgent):
 
     @classmethod
     def get_tools(cls) -> Sequence[BaseTool]:
-        return [DocumentsRetrieverTool(pdf_file=streamlit.session_state["uploaded_file"][cls.name])]
+        return [
+            DocumentsRetrieverTool(
+                pdf_file=streamlit.session_state["uploaded_file"][cls.name]
+            )
+        ]
 
     @classmethod
     def get_graph(cls):
