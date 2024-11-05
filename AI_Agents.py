@@ -198,3 +198,14 @@ with col23:
         ),
         unsafe_allow_html=True,
     )
+
+col31, col32, col33 = container.columns(3)
+
+with col31:
+    st.markdown(
+        custom_card(
+            title="Simple RAG",
+            description=[],
+        ),
+        unsafe_allow_html=True,
+    )

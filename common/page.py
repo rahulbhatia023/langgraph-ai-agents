@@ -147,7 +147,7 @@ class BasePage:
                         st.session_state.uploaded_file[cls.agent.name] = None
 
                     st.markdown(
-                        "<br/><br/><h3 style='color:#E9EFEC;font-family: Poppins;text-align: center'>Upload SQLite DB file</h3>",
+                        f"<br/><br/><h3 style='color:#E9EFEC;font-family: Poppins;text-align: center'>{cls.file_upload_label}</h3>",
                         unsafe_allow_html=True,
                     )
 
