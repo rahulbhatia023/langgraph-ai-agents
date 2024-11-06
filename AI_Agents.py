@@ -1,4 +1,9 @@
+import os
+
 import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def get_api_key(keys):
@@ -7,7 +12,7 @@ def get_api_key(keys):
             st.session_state[key_name] = ""
 
         if api_key := st.text_input(
-            label=f"{key_name}", value=st.session_state[key_name], type=key_type
+            label=f"{key_name}", value=os.getenv(key_name, ""), type=key_type
         ):
             st.session_state[key_name] = api_key
 
@@ -98,6 +103,9 @@ with st.sidebar:
             "REDDIT_CLIENT_ID": "password",
             "REDDIT_CLIENT_SECRET": "password",
             "REDDIT_USER_AGENT": "default",
+            "NEO4J_URI": "default",
+            "NEO4J_USERNAME": "default",
+            "NEO4J_PASSWORD": "password",
         }
     )
 
@@ -205,6 +213,15 @@ with col31:
     st.markdown(
         custom_card(
             title="Simple RAG",
+            description=[],
+        ),
+        unsafe_allow_html=True,
+    )
+
+with col32:
+    st.markdown(
+        custom_card(
+            title="Graph RAG",
             description=[],
         ),
         unsafe_allow_html=True,

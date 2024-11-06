@@ -21,6 +21,9 @@ wikipedia = "^1.4.0"
 google-generativeai = "^0.8.3"
 pypdf = "^5.1.0"
 faiss-cpu = "^1.9.0"
+langchain-experimental = "^0.3.3"
+neo4j = "^5.26.0"
+yfiles-jupyter-graphs = "^1.9.0"
 
 
 [build-system]

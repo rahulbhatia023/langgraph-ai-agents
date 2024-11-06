@@ -2,20 +2,18 @@ from typing import Sequence
 
 import streamlit
 from langchain.prompts import Prompt
-from langchain_core.messages import HumanMessage
 from langchain_core.tools import BaseTool
 from langchain_openai import ChatOpenAI
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
-from pydantic import BaseModel, Field
 
 from common.agent import BaseAgent
-from tools.simple_rag import DocumentsRetrieverTool
+from tools.graph_rag import DocumentsRetrieverTool
 
 
-class SimpleRAGAgent(BaseAgent):
-    name = "Simple RAG Agent"
+class GraphRAGAgent(BaseAgent):
+    name = "Graph RAG Agent"
 
     system_prompt = """
     You are a helpful assistant. Answer the user's questions based on the tools provided.
@@ -34,6 +32,9 @@ class SimpleRAGAgent(BaseAgent):
                 DocumentsRetrieverTool(
                     pdf_file=streamlit.session_state["uploaded_file"][cls.name],
                     openai_api_key=streamlit.session_state["OPENAI_API_KEY"],
+                    neo4j_uri=streamlit.session_state["NEO4J_URI"],
+                    neo4j_username=streamlit.session_state["NEO4J_USERNAME"],
+                    neo4j_password=streamlit.session_state["NEO4J_PASSWORD"],
                 )
             ]
         else:
@@ -73,7 +74,7 @@ class SimpleRAGAgent(BaseAgent):
                 """
             )
 
-            rag_chain = prompt | llm_with_tools
+            rag_chain = prompt | llm
 
             response = rag_chain.invoke({"context": docs, "question": question})
 
