@@ -6,6 +6,7 @@ from langchain_community.vectorstores import Neo4jVector
 from langchain_core.tools import BaseTool
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from openai import api_key
 from pydantic import Field
 
 
@@ -44,7 +45,7 @@ class DocumentsRetrieverTool(BaseTool):
 
         vector_index = Neo4jVector.from_existing_graph(
             graph=graph,
-            embedding=OpenAIEmbeddings(),
+            embedding=OpenAIEmbeddings(api_key=self.openai_api_key),
             node_label="Document",
             text_node_properties=["text"],
             embedding_node_property="embedding",
