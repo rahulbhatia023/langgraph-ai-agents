@@ -10,6 +10,7 @@ from pydantic import Field
 
 class DocumentsRetrieverTool(BaseTool):
     pdf_file: str = Field(..., description="Uploaded PDF file")
+    openai_api_key: str = Field(..., description="OpenAI API key")
 
     name: str = "documents-retriever"
     description: str = "Retrieve documents chunks"
@@ -19,9 +20,9 @@ class DocumentsRetrieverTool(BaseTool):
             doc.page_content
             for doc in FAISS.from_documents(
                 RecursiveCharacterTextSplitter(
-                    chunk_size=1500, chunk_overlap=100
+                    chunk_size=500, chunk_overlap=50
                 ).split_documents(PyPDFLoader(self.pdf_file).load()),
-                OpenAIEmbeddings(),
+                OpenAIEmbeddings(api_key=self.openai_api_key),
             )
             .as_retriever()
             .invoke(query)

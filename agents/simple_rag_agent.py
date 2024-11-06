@@ -22,13 +22,26 @@ class Grade(BaseModel):
 class SimpleRAGAgent(BaseAgent):
     name = "Simple RAG Agent"
 
+    system_prompt = """
+    You are a helpful assistant. Answer the user's questions based on the tools provided.
+    """
+
+    nodes_to_display = ["agent", "generate"]
+
     @classmethod
     def get_tools(cls) -> Sequence[BaseTool]:
-        return [
-            DocumentsRetrieverTool(
-                pdf_file=streamlit.session_state["uploaded_file"][cls.name]
-            )
-        ]
+        if (
+            "uploaded_file" in streamlit.session_state
+            and streamlit.session_state["uploaded_file"][cls.name]
+        ):
+            return [
+                DocumentsRetrieverTool(
+                    pdf_file=streamlit.session_state["uploaded_file"][cls.name],
+                    openai_api_key=streamlit.session_state["OPENAI_API_KEY"],
+                )
+            ]
+        else:
+            return []
 
     @classmethod
     def get_graph(cls):
@@ -84,7 +97,7 @@ class SimpleRAGAgent(BaseAgent):
                 """
             )
 
-            rag_chain = prompt | llm_with_tools | StrOutputParser()
+            rag_chain = prompt | llm_with_tools
 
             response = rag_chain.invoke({"context": docs, "question": question})
 

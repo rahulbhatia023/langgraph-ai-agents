@@ -110,12 +110,7 @@ class BasePage:
         )
 
         if cls.required_keys and not keys_missing(cls.required_keys):
-            if "graphs" not in st.session_state:
-                st.session_state.graphs = {}
-            if cls.agent.name not in st.session_state.graphs:
-                st.session_state.graphs[cls.agent.name] = cls.agent.get_graph()
-
-            agent_graph = st.session_state.graphs[cls.agent.name]
+            agent_graph = cls.agent.get_graph()
 
             with st.sidebar:
                 st.markdown(
@@ -162,6 +157,7 @@ class BasePage:
                             st.session_state["uploaded_file"][
                                 cls.agent.name
                             ] = file.name
+                            agent_graph = cls.agent.get_graph()
 
             if "page_messages" not in st.session_state:
                 st.session_state.page_messages = {}
