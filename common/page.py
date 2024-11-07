@@ -28,6 +28,10 @@ class BasePage:
     file_upload_type: list[str] = ["csv"]
 
     @classmethod
+    def on_file_upload(cls, uploaded_file):
+        pass
+
+    @classmethod
     def stream_events(cls, agent_graph, human_message):
         config = {"configurable": {"thread_id": "1"}}
 
@@ -151,13 +155,23 @@ class BasePage:
                         type=cls.file_upload_type,
                         label_visibility="hidden",
                     ):
-                        with tempfile.NamedTemporaryFile(delete=False) as file:
-                            file.write(uploaded_file.read())
-                            file.flush()
-                            st.session_state["uploaded_file"][
-                                cls.agent.name
-                            ] = file.name
-                            agent_graph = cls.agent.get_graph()
+                        if not st.session_state["uploaded_file"][cls.agent.name]:
+                            st.info("Uploading file, please wait...")
+                            with tempfile.NamedTemporaryFile(delete=False) as file:
+                                file.write(uploaded_file.read())
+                                file.flush()
+                                st.session_state["uploaded_file"][
+                                    cls.agent.name
+                                ] = file.name
+
+                            cls.on_file_upload(
+                                uploaded_file=st.session_state["uploaded_file"][
+                                    cls.agent.name
+                                ]
+                            )
+                            st.info("File uploaded successfully")
+
+                        agent_graph = cls.agent.get_graph()
 
             if "page_messages" not in st.session_state:
                 st.session_state.page_messages = {}

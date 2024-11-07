@@ -15,12 +15,6 @@ from tools.graph_rag import DocumentsRetrieverTool
 class GraphRAGAgent(BaseAgent):
     name = "Graph RAG Agent"
 
-    system_prompt = """
-    You are a helpful assistant. Answer the user's questions based on the tools provided.
-    """
-
-    nodes_to_display = ["agent", "generate"]
-
     @classmethod
     def get_tools(cls) -> Sequence[BaseTool]:
         if (

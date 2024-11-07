@@ -21,26 +21,10 @@ class DocumentsRetrieverTool(BaseTool):
     description: str = "Retrieve similar documents chunks"
 
     def _run(self, query: str) -> Union[Dict, str]:
-        llm = ChatOpenAI(
-            model="gpt-4o",
-            api_key=self.openai_api_key,
-            temperature=0,
-        )
-
-        documents = PyPDFLoader(self.pdf_file).load()
-
-        graph_documents = LLMGraphTransformer(llm=llm).convert_to_graph_documents(
-            documents
-        )
-
         graph = Neo4jGraph(
             url=self.neo4j_uri,
             username=self.neo4j_username,
             password=self.neo4j_password,
-        )
-
-        graph.add_graph_documents(
-            graph_documents, baseEntityLabel=True, include_source=True
         )
 
         vector_index = Neo4jVector.from_existing_graph(
