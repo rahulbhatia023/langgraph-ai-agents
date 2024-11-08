@@ -16,7 +16,7 @@ page_subheader_style = f"font-family: {font_family};color: {light_green_color};t
 vertical_space_div_style = f"margin-top: 80px;margin-bottom: 80px;"
 custom_card_div_style = f"background-color: {mild_green_color};border: 2px solid #FFFFFF;border-radius: 20px;padding: 20px;height: 405px;margin-bottom: 30px;margin-left: 10px;"
 custom_card_title_style = f"color: {dark_green_color};font-family: {font_family};font-weight: 600;margin-bottom: 10px;text-align: center;"
-custom_card_points_style = f"font: {font_family}"
+custom_card_points_style = f"font-family: {font_family}"
 
 
 def custom_card(title, description):
