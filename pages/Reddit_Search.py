@@ -5,12 +5,12 @@ from common.page import BasePage
 class RedditSearchPage(BasePage):
     agent = RedditSearchAgent
 
-    required_keys = [
-        "OPENAI_API_KEY",
-        "REDDIT_CLIENT_ID",
-        "REDDIT_CLIENT_SECRET",
-        "REDDIT_USER_AGENT",
-    ]
+    required_keys = {
+        "OPENAI_API_KEY": "password",
+        "REDDIT_CLIENT_ID": "password",
+        "REDDIT_CLIENT_SECRET": "password",
+        "REDDIT_USER_AGENT": "default",
+    }
 
 
 RedditSearchPage.display()

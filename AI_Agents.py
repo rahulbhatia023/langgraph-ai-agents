@@ -1,17 +1,6 @@
 import streamlit as st
 
 
-def get_api_key(keys):
-    for key_name, key_type in keys.items():
-        if key_name not in st.session_state:
-            st.session_state[key_name] = ""
-
-        if api_key := st.text_input(
-            label=f"{key_name}", value=st.session_state[key_name], type=key_type
-        ):
-            st.session_state[key_name] = api_key
-
-
 def custom_card(title, description):
     return f"""
     <div class="custom-card">
@@ -85,24 +74,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-with st.sidebar:
-    get_api_key(
-        {
-            "OPENAI_API_KEY": "password",
-            "GOOGLE_API_KEY": "password",
-            "E2B_API_KEY": "password",
-            "FINANCIAL_DATASETS_API_KEY": "password",
-            "POLYGON_API_KEY": "password",
-            "TAVILY_API_KEY": "password",
-            "REDDIT_CLIENT_ID": "password",
-            "REDDIT_CLIENT_SECRET": "password",
-            "REDDIT_USER_AGENT": "default",
-            "NEO4J_URI": "default",
-            "NEO4J_USERNAME": "default",
-            "NEO4J_PASSWORD": "password",
-        }
-    )
 
 st.markdown("<h1>Welcome to the World of AI Agents</h1>", unsafe_allow_html=True)
 st.markdown("<h3>Where Intelligence Meets Innovation</h3>", unsafe_allow_html=True)

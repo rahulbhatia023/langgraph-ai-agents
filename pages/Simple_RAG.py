@@ -5,7 +5,7 @@ from common.page import BasePage
 class SimpleRAGPage(BasePage):
     agent = SimpleRAGAgent
 
-    required_keys = ["OPENAI_API_KEY"]
+    required_keys = {"OPENAI_API_KEY": "password"}
 
     show_file_uploader = True
     file_upload_label = "Upload PDF file"

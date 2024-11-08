@@ -8,18 +8,29 @@ from common.agent import BaseAgent
 from common.chat import add_chat_message, display_message
 
 
-def keys_missing(required_keys: list[str]):
+def get_api_key(keys):
+    for key_name, key_type in keys.items():
+        if key_name not in st.session_state:
+            st.session_state[key_name] = ""
+
+        if api_key := st.text_input(
+            label=f"{key_name}", value=st.session_state[key_name], type=key_type
+        ):
+            st.session_state[key_name] = api_key
+
+
+def keys_missing(keys):
     if_missing = False
-    for key in required_keys:
+    for key in keys.keys():
         if key not in st.session_state or not st.session_state[key]:
-            st.error(f"Please enter {key} in the home page.", icon="🚨")
+            st.error(f"Please enter {key}", icon="🚨")
             if_missing = True
     return if_missing
 
 
 class BasePage:
     agent: BaseAgent = None
-    required_keys: list[str] = []
+    required_keys: dict[str, str] = {}
     page_icon: PageIcon = "🤖"
     layout: Layout = "wide"
 
@@ -112,6 +123,9 @@ class BasePage:
             f"<h2 class='fontStyle' style='color:#C4DAD2';>{cls.agent.name}</h2><br/>",
             unsafe_allow_html=True,
         )
+
+        with st.sidebar:
+            get_api_key(cls.required_keys)
 
         if cls.required_keys and not keys_missing(cls.required_keys):
             agent_graph = cls.agent.get_graph()

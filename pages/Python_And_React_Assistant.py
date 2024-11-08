@@ -11,7 +11,7 @@ from common.page import BasePage
 class PythonAndReactAssistantPage(BasePage):
     agent = PythonAndReactAssistantAgent
 
-    required_keys = ["OPENAI_API_KEY", "E2B_API_KEY"]
+    required_keys = {"OPENAI_API_KEY": "password", "E2B_API_KEY": "password"}
 
     @classmethod
     def pre_render(cls):
