@@ -1,29 +1,45 @@
 import streamlit as st
 
 page_header = "Welcome to the World of AI Agents"
-page_subheader = "Where Intelligence Meets Innovation"
 
-font_family = "Poppins"
+font_family = "monospace"
 
-dark_green_color = "#16423C"
-mild_green_color = "#6A9C89"
-light_green_color = "#C4DAD2"
+background_color = "#0D1117"
+text_color = "#58A6FF"
+accent_color = "#2EA043"
+card_bg_color = "#161B22"
 
-page_header_style = (
-    f"font-family: {font_family};color: {light_green_color};text-align: center;"
-)
-page_subheader_style = f"font-family: {font_family};color: {light_green_color};text-align: center;font-size: 20px;font-weight: 10;"
-vertical_space_div_style = f"margin-top: 80px;margin-bottom: 80px;"
-custom_card_div_style = f"background-color: {mild_green_color};border: 2px solid #FFFFFF;border-radius: 20px;padding: 20px;height: 405px;margin-bottom: 30px;margin-left: 10px;"
-custom_card_title_style = f"color: {dark_green_color};font-family: {font_family};font-weight: 600;margin-bottom: 10px;text-align: center;"
-custom_card_points_style = f"font-family: {font_family}"
+page_header_style = f"""
+    font-family: {font_family};
+    color: {text_color};
+    text-align: center;
+"""
+vertical_space_div_style = f"margin-top: 40px;margin-bottom: 40px;"
+custom_card_div_style = f"""
+    background-color: {card_bg_color};
+    border: 1px solid {accent_color};
+    border-radius: 5px;
+    padding: 20px;
+    height: 500px;
+    margin-bottom: 30px;
+    margin-left: 10px;
+    font-family: {font_family};
+"""
+custom_card_title_style = f"""
+    color: {accent_color};
+    font-family: {font_family};
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-align: center;
+"""
+custom_card_points_style = f"font-family: {font_family};font-size: 14px;color: {text_color};"
 
 
 def custom_card(title, description):
     return f"""
     <div style='{custom_card_div_style}'>
         <h4 style='{custom_card_title_style}'>{title}</h4>
-        {f"<ul style='{custom_card_points_style}'>" + "".join([f"<li>{point}</li>" for point in description]) + "</ul>"}
+        <p style='{custom_card_points_style}'>{"<br><br>".join([f"> {point}" for point in description])}</p>
     </div>
     """
 
@@ -33,11 +49,11 @@ st.set_page_config(page_title="AI Agents", page_icon="🤖", layout="wide")
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins');
-    
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
+
     .stApp {
-        background-color: #16423C;
-        font-family: 'Poppins';
+        background-color: #0D1117;
+        font-family: 'JetBrains Mono';
     }
     </style>
     """,
@@ -47,9 +63,7 @@ st.markdown(
 st.markdown(
     f"<h1 style='{page_header_style}'>{page_header}</h1>", unsafe_allow_html=True
 )
-st.markdown(
-    f"<h3 style='{page_subheader_style}'>{page_subheader}</h3>", unsafe_allow_html=True
-)
+
 st.markdown(f"<div style='{vertical_space_div_style}' />", unsafe_allow_html=True)
 
 container = st.container()
