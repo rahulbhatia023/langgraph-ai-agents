@@ -30,7 +30,7 @@ class GraphRAGPage(BasePage):
                 api_key=streamlit.session_state["OPENAI_API_KEY"],
                 temperature=0,
             )
-        ).convert_to_graph_documents(PyPDFLoader(uploaded_file).load())
+        ).convert_to_graph_documents(documents=PyPDFLoader(uploaded_file).load())
 
         Neo4jGraph(
             url=streamlit.session_state["NEO4J_URI"],

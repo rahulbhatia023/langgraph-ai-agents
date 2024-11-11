@@ -32,7 +32,7 @@ custom_card_title_style = f"""
     margin-bottom: 10px;
     text-align: center;
 """
-custom_card_points_style = f"font-family: {font_family};font-size: 14px;color: {text_color};"
+custom_card_points_style = f"font-family: {font_family};font-size: 16px;color: {text_color};"
 
 
 def custom_card(title, description):
